@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+output/*
+!output/.gitkeep
+state/loop_state.json
+state/spec_lock.json
+evidence/runs/*/

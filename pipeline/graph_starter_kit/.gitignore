@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.bak
+.langgraph_api/
+output/travel_site.html
+output/research_data.json
+state/*.sqlite
+evidence/runs/*/
+evidence/failures/*.jsonl
+evidence/*.log
+*.egg-info/

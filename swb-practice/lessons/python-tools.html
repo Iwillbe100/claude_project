@@ -1,0 +1,76 @@
+<h2>시간 복잡도 함정 표</h2>
+<p>같아 보이지만 파이썬에서 느린 연산이 있다. 호출이 수만 번이면 차이가 크게 난다.</p>
+<table>
+  <tr><th>연산</th><th>복잡도</th><th>대신 쓸 것</th></tr>
+  <tr><td><code>x in some_list</code></td><td>O(N)</td><td><code>set</code>, <code>dict</code> (O(1))</td></tr>
+  <tr><td><code>lst.pop(0)</code>, <code>lst.insert(0, x)</code></td><td>O(N)</td><td><code>collections.deque</code></td></tr>
+  <tr><td><code>lst.remove(x)</code>, <code>lst.index(x)</code></td><td>O(N)</td><td>dict로 위치 관리</td></tr>
+  <tr><td><code>sorted(...)</code> 반복 호출</td><td>O(N log N)</td><td>힙, 한 번 정렬 후 <code>bisect</code></td></tr>
+  <tr><td><code>s[:k]</code> 문자열 슬라이스</td><td>O(k)</td><td>k가 작으면 괜찮다 (길이 10 이하)</td></tr>
+  <tr><td><code>lst.append(x)</code>, <code>d[key]</code>, <code>set.add</code></td><td>O(1)</td><td></td></tr>
+</table>
+
+<h2>dict와 set</h2>
+<pre class="codeview"><code>count = {}
+count[word] = count.get(word, 0) + 1     # 없으면 0으로 시작
+if word in count:                        # O(1)
+    del count[word]
+value = count.pop(word, -1)              # 있으면 꺼내고, 없으면 -1
+
+from collections import defaultdict
+adj = defaultdict(list)                  # 없는 키는 빈 리스트로 시작
+adj[3].append(5)</code></pre>
+
+<h2>heapq: 최소 힙</h2>
+<pre class="codeview"><code>from heapq import heappush, heappop
+
+heap = []
+heappush(heap, (-score, user_id))        # 최대 힙은 부호를 뒤집는다
+neg_score, uid = heappop(heap)           # 점수가 가장 큰 것, 같으면 ID가 작은 것
+top = heap[0]                            # 꺼내지 않고 보기</code></pre>
+<p>튜플은 앞에서부터 비교하므로 <code>(-점수, ID)</code>로 넣으면 "점수 내림차순, 같으면 ID 오름차순"이 된다.</p>
+
+<h2>deque: 양쪽 끝이 O(1)인 큐</h2>
+<pre class="codeview"><code>from collections import deque
+
+q = deque([(0, 0)])
+r, c = q.popleft()
+q.append((r, c + 1))</code></pre>
+
+<h2>bisect: 정렬된 리스트에서 위치 찾기</h2>
+<pre class="codeview"><code>from bisect import bisect_left, bisect_right, insort
+
+a = [1, 3, 3, 7]
+bisect_left(a, 3)     # 1  (3 이상이 처음 나오는 위치)
+bisect_right(a, 3)    # 3  (3 초과가 처음 나오는 위치)
+insort(a, 5)          # 정렬을 유지하며 삽입 (삽입은 O(N)이지만 빠르다)</code></pre>
+
+<h2>2차원 리스트: 이 실수가 가장 흔하다</h2>
+<pre class="codeview"><code>grid = [[0] * n for _ in range(n)]   # 맞다: 행마다 새 리스트
+bad  = [[0] * n] * n                 # 틀리다: 모든 행이 같은 리스트를 가리킨다
+
+copy = [row[:] for row in mMap]      # 입력으로 받은 2차원 리스트는 이렇게 복사해 둔다</code></pre>
+
+<h2>global: 함수 안에서 전역 변수에 대입할 때</h2>
+<pre class="codeview"><code>count = 0
+items = []
+
+def init():
+    global count, items      # 대입(=)하는 전역 변수는 선언해야 한다
+    count = 0
+    items = []
+
+def add(x):
+    global count
+    count += 1               # += 도 대입이다
+    items.append(x)          # 리스트 내용을 바꾸는 건 선언이 필요 없다</code></pre>
+<div class="callout warn">
+  <b>init에서 <code>items = []</code>만 쓰고 <code>global</code>을 빼먹으면</b> 지역 변수만 새로 만들어지고 전역 리스트는 그대로 남는다. 가장 많이 틀리는 부분이다. 리스트는 <code>items.clear()</code>로 비우면 <code>global</code> 선언 없이도 된다.
+</div>
+
+<h2>재귀 깊이</h2>
+<pre class="codeview"><code>import sys
+sys.setrecursionlimit(10000)   # 기본값은 1000. DFS 재귀가 깊어질 때 필요</code></pre>
+
+<h2>정수 크기</h2>
+<p>파이썬 정수는 오버플로가 없다. C++처럼 <code>long long</code> 걱정은 하지 않아도 된다. 대신 큰 수 연산은 조금 느리다.</p>

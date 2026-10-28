@@ -1,0 +1,79 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>이름이나 ID로 데이터를 <b>바로 찾아야</b> 할 때 → 해시(<code>dict</code>)</li>
+  <li>"어떤 문자열로 <b>시작하는</b> 단어가 몇 개인가"를 물을 때 → 접두사 dict 또는 트라이</li>
+</ul>
+
+<h2>핵심 아이디어 1: 해시</h2>
+<p>dict는 키로 값을 O(1)에 찾는다. 단어별 개수를 세는 것이 가장 기본 사용이다.</p>
+<pre class="codeview"><code>cnt = {}
+cnt[w] = cnt.get(w, 0) + 1        # 추가
+c = cnt.get(w, 0)                 # 없으면 0</code></pre>
+
+<h2>핵심 아이디어 2: 접두사를 미리 세어 두기</h2>
+<p>단어 길이가 짧다(10 이하)면, 단어를 추가할 때 <b>그 단어의 모든 접두사</b>에 1을 더해 두면 된다. 질문은 dict 조회 한 번으로 끝난다.</p>
+<pre class="diagram">add("abc")  →  prefix_cnt["a"]   += 1
+               prefix_cnt["ab"]  += 1
+               prefix_cnt["abc"] += 1
+
+countPrefix("ab")  →  prefix_cnt["ab"]</pre>
+<pre class="codeview"><code>prefix_cnt = {}
+
+def add_prefixes(word, delta):
+    for i in range(1, len(word) + 1):
+        p = word[:i]
+        prefix_cnt[p] = prefix_cnt.get(p, 0) + delta</code></pre>
+<p>추가는 O(L), 질문은 O(1)이다. (L은 단어 길이)</p>
+
+<h2>핵심 아이디어 3: 트라이</h2>
+<p>트라이는 단어를 글자 단위 트리로 저장한다. 같은 접두사는 같은 경로를 공유하고, 각 노드에 "이 노드를 지나는 단어 수"를 저장하면 접두사 질문에 답할 수 있다. 단어가 아주 길거나, 접두사를 따라 내려가며 탐색해야 할 때 유리하다.</p>
+<pre class="diagram">  (root)
+    └ a ─ b ─ c    ← "abc"
+          └ d      ← "abd"   "ab" 노드를 지나는 단어: 2개</pre>
+<pre class="codeview"><code>class Trie:
+    def __init__(self):
+        self.child = [{}]       # child[노드][글자] = 자식 노드 번호
+        self.pass_cnt = [0]     # 이 노드를 지나는 단어 수
+        self.end_cnt = [0]      # 이 노드에서 끝나는 단어 수
+
+    def add(self, word):
+        cur = 0
+        self.pass_cnt[0] += 1
+        for ch in word:
+            nxt = self.child[cur].get(ch)
+            if nxt is None:
+                nxt = len(self.child)
+                self.child.append({})
+                self.pass_cnt.append(0)
+                self.end_cnt.append(0)
+                self.child[cur][ch] = nxt
+            cur = nxt
+            self.pass_cnt[cur] += 1
+        self.end_cnt[cur] += 1
+        return self.end_cnt[cur]
+
+    def count_prefix(self, prefix):
+        cur = 0
+        for ch in prefix:
+            cur = self.child[cur].get(ch)
+            if cur is None:
+                return 0
+        return self.pass_cnt[cur]</code></pre>
+
+<h2>삭제는 존재 확인부터</h2>
+<div class="callout warn">
+  단어를 지울 때 <b>먼저 그 단어가 있는지 확인</b>해야 한다. 없는데 접두사 개수를 줄이면 다른 단어의 개수까지 망가진다. 있을 때만 단어 개수와 접두사 개수를 같이 줄인다.
+</div>
+
+<h2>복잡도</h2>
+<table>
+  <tr><th>방법</th><th>추가·삭제</th><th>접두사 질문</th><th>메모리</th></tr>
+  <tr><td>접두사 dict</td><td>O(L)</td><td>O(1)</td><td>단어 수 × L</td></tr>
+  <tr><td>트라이</td><td>O(L)</td><td>O(L)</td><td>노드 수</td></tr>
+</table>
+
+<h2>정리</h2>
+<ul>
+  <li>L이 10 이하이면 접두사 dict가 가장 짧고 빠르다.</li>
+  <li>init에서 dict를 새로 만든다. <code>global</code> 선언을 잊지 말자.</li>
+</ul>

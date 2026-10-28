@@ -1,0 +1,70 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>부서, 폴더, 가족처럼 <b>부모-자식 관계</b>가 있고</li>
+  <li>추가·삭제가 일어나며 "하위 전체의 합"을 묻는 문제</li>
+</ul>
+
+<h2>핵심 아이디어: 제약 사항을 읽어라</h2>
+<p>트리 문제에서 가장 중요한 단서는 <b>깊이 제한</b>이다. 조직도 문제는 "트리의 깊이는 100 이하"라고 알려 준다. 그러면 <b>조상을 따라 올라가는 일은 최대 100번</b>이라서, 추가·삭제마다 조상들을 모두 고쳐도 충분히 빠르다.</p>
+<p>그래서 각 부서가 자기 아래의 <b>총합을 미리 저장</b>해 두고, 바뀔 때만 조상들의 값을 갱신한다. 질문은 저장된 값을 읽기만 하면 끝난다.</p>
+
+<h2>무엇을 저장하나</h2>
+<pre class="codeview"><code>parent = {}      # 부서 → 부모 (루트의 부모는 0)
+total = {}       # 부서 → 자기 + 하위 전체 인원
+removed = set()  # 삭제된 부서</code></pre>
+
+<h2>추가: 조상들의 합계를 더한다</h2>
+<pre class="diagram">10(5) ─ 20(3)          add(30, 4, parent=20)
+                        30의 total = 4
+                        조상 20: 3 + 4 = 7
+                        조상 10: 8 + 4 = 12   ← 올라가며 모두 더한다</pre>
+<pre class="codeview"><code>def add(mId, mNum, mParent):
+    if not alive(mParent):
+        return -1
+    parent[mId] = mParent
+    total[mId] = mNum
+    cur = mParent
+    while cur:                       # 루트의 부모(0)에 닿을 때까지
+        total[cur] += mNum
+        cur = parent[cur]
+    return total[mParent]</code></pre>
+
+<h2>삭제: 하위를 하나씩 지우지 않는다</h2>
+<p>부서를 삭제하면 하위 부서도 모두 사라진다. 그렇다고 자손을 전부 찾아서 지울 필요는 없다.</p>
+<ol>
+  <li>삭제하는 부서의 <code>total</code>이 곧 <b>사라지는 인원</b>이다. 그만큼을 조상들에게서 뺀다.</li>
+  <li>그 부서에 <b>삭제 표시</b>만 한다.</li>
+  <li>자손은 건드리지 않고, "존재하는가?"를 물을 때 <b>조상 중에 삭제된 부서가 있는지</b> 확인한다.</li>
+</ol>
+<pre class="codeview"><code>def alive(mId):
+    while mId:
+        if mId not in parent or mId in removed:
+            return False
+        mId = parent[mId]
+    return True
+
+def remove_dept(mId):
+    if not alive(mId):
+        return -1
+    removed.add(mId)
+    amount = total[mId]
+    cur = parent[mId]
+    while cur:
+        total[cur] -= amount
+        cur = parent[cur]
+    return amount</code></pre>
+<p>이렇게 하면 삭제도 O(깊이)로 끝난다. 하위 부서 수가 많아도 상관없다.</p>
+
+<h2>자주 하는 실수</h2>
+<div class="callout warn">
+  <ul>
+    <li><b>존재 확인을 부서 하나만 한다.</b> 부서 자체는 삭제되지 않았어도 조상이 삭제되었을 수 있다.</li>
+    <li><b>삭제된 부서의 인원을 조상에게서 빼지 않는다.</b> 이후 모든 합계가 틀린다.</li>
+    <li><b>루트의 부모를 0으로 약속하고</b> ID가 0인 부서를 쓰면 반복문이 일찍 끝난다. 이 문제의 ID는 1 이상이다.</li>
+    <li><b>init에서 세 자료구조를 모두 새로 만든다.</b></li>
+  </ul>
+</div>
+
+<h2>복잡도</h2>
+<p>추가, 삭제, 조회 모두 O(깊이) = 최대 100. 호출이 3만 번이면 300만 번 정도의 연산이다.</p>
+<p>깊이 제한이 없다면 이 방법은 쓸 수 없고, 트리를 번호 매겨 펴는 오일러 투어 + 세그먼트 트리 같은 방법을 써야 한다.</p>

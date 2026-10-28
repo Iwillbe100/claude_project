@@ -1,0 +1,76 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>"이어진 칸(섬, 영역)의 <b>넓이</b>와 <b>개수</b>"</li>
+  <li>끝까지 파고들어서 모든 경우를 확인해야 할 때 (경로 찾기, 조합)</li>
+</ul>
+
+<h2>핵심 아이디어</h2>
+<p>한 칸에서 시작해서 이어진 칸으로 계속 들어가고, <b>한 번 간 칸은 표시</b>해서 다시 가지 않는다. 더 갈 곳이 없으면 돌아온다.</p>
+<pre class="diagram">1 1 0        (0,0)에서 시작
+0 1 0   →    (0,0) → (0,1) → (1,1) → (2,1) → 더 없음, 돌아감
+0 1 1                          └→ (2,2) → 더 없음
+                  섬의 넓이 = 5</pre>
+
+<h2>방향 배열</h2>
+<pre class="codeview"><code>DR = (-1, 1, 0, 0)      # 위, 아래, 왼쪽, 오른쪽
+DC = (0, 0, -1, 1)
+
+for d in range(4):
+    nr, nc = r + DR[d], c + DC[d]
+    if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n:    # 범위 확인을 먼저
+        ...</code></pre>
+
+<h2>재귀 DFS</h2>
+<p>함수가 "이 칸에서 시작해서 방문한 칸 수"를 반환하게 만들면 넓이가 바로 나온다.</p>
+<pre class="codeview"><code>import sys
+sys.setrecursionlimit(10000)
+
+def dfs(r, c, seen):
+    seen[r][c] = True
+    area = 1
+    for d in range(4):
+        nr, nc = r + DR[d], c + DC[d]
+        if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and grid[nr][nc] == 1 and not seen[nr][nc]:
+            area += dfs(nr, nc, seen)
+    return area
+
+def count_island():
+    seen = [[False] * n for _ in range(n)]
+    count = 0
+    for r in range(n):
+        for c in range(n):
+            if grid[r][c] == 1 and not seen[r][c]:
+                dfs(r, c, seen)            # 이 섬 전체를 방문 처리
+                count += 1
+    return count</code></pre>
+<p>"아직 방문하지 않은 땅을 만날 때마다 DFS를 한 번 돌리면, 그 횟수가 섬의 개수"라는 점이 핵심이다.</p>
+
+<h2>재귀 한도 문제</h2>
+<div class="callout warn">
+  파이썬의 재귀 기본 한도는 <b>1000</b>이다. 땅이 뱀처럼 길게 이어지면 깊이가 1000을 넘어서 <code>RecursionError</code>가 난다. <code>sys.setrecursionlimit(10000)</code>으로 늘리거나, 아래처럼 스택을 직접 쓰는 반복문으로 바꾼다.
+</div>
+
+<h2>반복문 DFS (스택)</h2>
+<pre class="codeview"><code>def area_iter(sr, sc, seen):
+    seen[sr][sc] = True
+    stack = [(sr, sc)]
+    area = 0
+    while stack:
+        r, c = stack.pop()
+        area += 1
+        for d in range(4):
+            nr, nc = r + DR[d], c + DC[d]
+            if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and grid[nr][nc] == 1 and not seen[nr][nc]:
+                seen[nr][nc] = True      # 스택에 넣을 때 방문 처리
+                stack.append((nr, nc))
+    return area</code></pre>
+
+<h2>복잡도</h2>
+<p>칸이 N×N개이면 O(N²). 호출마다 전체를 다시 탐색해도 N ≤ 50, 호출 500번이면 충분히 빠르다.</p>
+
+<h2>자주 하는 실수</h2>
+<ul>
+  <li>방문 표시를 빼먹으면 무한 재귀에 빠진다.</li>
+  <li><code>seen</code>을 호출마다 새로 만들어야 한다. 이전 호출의 표시가 남아 있으면 안 된다.</li>
+  <li>범위 검사 전에 <code>grid[nr][nc]</code>를 읽으면 음수 인덱스가 반대편 칸을 읽어서 조용히 틀린다.</li>
+</ul>

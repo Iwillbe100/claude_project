@@ -1,0 +1,96 @@
+[
+  {
+    "id": "guide",
+    "title": "B형 시험, 이렇게 풀면 된다",
+    "level": "기초",
+    "minutes": 8,
+    "summary": "함수 구현형 문제의 구조, 제약 사항으로 알고리즘 고르는 법, 시험장에서 자주 하는 실수."
+  },
+  {
+    "id": "python-tools",
+    "title": "파이썬 도구함",
+    "level": "기초",
+    "minutes": 10,
+    "summary": "dict, set, heapq, deque, bisect와 global, 2차원 리스트까지. 시간 복잡도 함정 정리."
+  },
+  {
+    "id": "simulation",
+    "title": "구현과 시뮬레이션",
+    "level": "입문",
+    "minutes": 12,
+    "problem": "p10-robot",
+    "summary": "규칙을 정리해서 그대로 옮기기. 방향 배열, 상태 동기화, 이벤트 기반 시뮬레이션."
+  },
+  {
+    "id": "hash-trie",
+    "title": "해시와 트라이",
+    "level": "입문",
+    "minutes": 10,
+    "problem": "p1-word",
+    "summary": "이름·ID로 바로 찾기, 접두사 개수 세기."
+  },
+  {
+    "id": "union-find",
+    "title": "유니온 파인드",
+    "level": "입문",
+    "minutes": 8,
+    "problem": "p5-union",
+    "summary": "그룹 합치기와 같은 그룹 확인을 거의 O(1)로."
+  },
+  {
+    "id": "dfs",
+    "title": "DFS (깊이 우선 탐색)",
+    "level": "입문",
+    "minutes": 10,
+    "problem": "p8-dfs",
+    "summary": "연결된 영역 찾기, 재귀 깊이 문제와 반복문 버전."
+  },
+  {
+    "id": "bfs",
+    "title": "BFS (너비 우선 탐색)",
+    "level": "입문",
+    "minutes": 10,
+    "problem": "p9-bfs",
+    "summary": "가중치 없는 최단 거리. 큐와 거리 배열."
+  },
+  {
+    "id": "binary-search",
+    "title": "이분 탐색",
+    "level": "입문",
+    "minutes": 10,
+    "problem": "p7-binary",
+    "summary": "정렬된 배열 검색, 그리고 '답을 정해 놓고 확인하는' 파라메트릭 서치."
+  },
+  {
+    "id": "heap",
+    "title": "힙(우선순위 큐)과 지연 삭제",
+    "level": "심화",
+    "minutes": 10,
+    "problem": "p2-ranking",
+    "summary": "최댓값을 계속 꺼내기, 값이 바뀌거나 지워질 때 쓰는 lazy deletion."
+  },
+  {
+    "id": "dijkstra",
+    "title": "다익스트라",
+    "level": "심화",
+    "minutes": 12,
+    "problem": "p6-dijkstra",
+    "summary": "가중치 있는 최단 거리. 힙으로 가까운 곳부터 확정."
+  },
+  {
+    "id": "segment-tree",
+    "title": "세그먼트 트리",
+    "level": "심화",
+    "minutes": 12,
+    "problem": "p3-segment",
+    "summary": "구간 최댓값·최솟값·합을 질의하고 한 칸을 수정하기."
+  },
+  {
+    "id": "tree",
+    "title": "트리 관리하기",
+    "level": "심화",
+    "minutes": 8,
+    "problem": "p4-org",
+    "summary": "부모·합계를 저장하고, 깊이 제한을 활용해 갱신하기. 삭제 처리."
+  }
+]

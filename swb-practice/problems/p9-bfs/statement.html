@@ -1,0 +1,35 @@
+<h2>문제 설명</h2>
+<p>N × N 크기의 미로가 있다. 각 칸은 길(0)이거나 벽(1)이다. 길인 칸에서 위, 아래, 왼쪽, 오른쪽의 길인 칸으로 한 칸씩 움직일 수 있다. 벽은 지나갈 수 없다.</p>
+<p>벽을 허물거나 길을 막을 수 있다. 두 칸 사이를 가는 <b>최소 이동 횟수</b>를 계속 물어본다.</p>
+
+<h2>구현할 함수</h2>
+<pre><code>def init(N: int, mMap: list) -&gt; None</code></pre>
+<p>각 테스트 케이스의 처음에 호출된다. <code>mMap[r][c]</code>는 r행 c열 칸의 상태이다. 행과 열 번호는 0부터 시작한다.</p>
+
+<pre><code>def toggle(mR: int, mC: int) -&gt; None</code></pre>
+<p>r행 c열 칸의 상태를 뒤집는다. 길이면 벽으로, 벽이면 길로 바뀐다.</p>
+
+<pre><code>def shortest(mSR: int, mSC: int, mER: int, mEC: int) -&gt; int</code></pre>
+<p>(<code>mSR</code>, <code>mSC</code>)에서 (<code>mER</code>, <code>mEC</code>)까지 가는 최소 이동 횟수를 반환한다.<br>
+갈 수 없으면 <b>-1</b>을 반환한다. 출발 칸이나 도착 칸이 벽인 경우도 -1이다. 출발 칸과 도착 칸이 같은 길이면 0이다.</p>
+
+<h2>제약 사항</h2>
+<ul>
+  <li>2 ≤ N ≤ 40</li>
+  <li>0 ≤ 모든 행, 열 번호 &lt; N</li>
+  <li>각 테스트 케이스에서 <code>toggle</code>과 <code>shortest</code>를 합쳐 최대 1,000번 호출한다.</li>
+</ul>
+
+<h2>예시</h2>
+<pre><code>0 0 0 0
+1 1 0 1
+0 0 0 0
+0 1 1 0</code></pre>
+<table>
+  <tr><th>호출</th><th>반환</th><th>설명</th></tr>
+  <tr><td>shortest(0, 0, 2, 0)</td><td>6</td><td>(1,0)이 벽이라서 오른쪽으로 돌아간다</td></tr>
+  <tr><td>toggle(1, 0)</td><td></td><td>벽이 길이 된다</td></tr>
+  <tr><td>shortest(0, 0, 2, 0)</td><td>2</td><td></td></tr>
+  <tr><td>shortest(0, 0, 3, 0)</td><td>3</td><td></td></tr>
+  <tr><td>shortest(3, 1, 0, 0)</td><td>-1</td><td>출발 칸이 벽</td></tr>
+</table>

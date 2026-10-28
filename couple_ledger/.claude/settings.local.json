@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(firebase deploy --only hosting)",
+      "Bash(firebase deploy --only hosting)"
+    ]
+  }
+}

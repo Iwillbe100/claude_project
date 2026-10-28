@@ -1,0 +1,59 @@
+{
+  "intro": "프로그래머스 문제는 함수 하나가 결과를 반환하는 형태라서, 이 사이트처럼 상태를 유지하며 여러 번 호출되는 B형과는 다릅니다. 알고리즘 자체를 익히는 데 쓰세요. 링크와 문제 내용은 2026-10에 확인한 것이며, 레벨은 확인된 경우에만 적었습니다.",
+  "items": {
+    "simulation": [
+      { "site": "프로그래머스", "title": "키패드 누르기", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/67256", "note": "규칙(거리 비교, 손잡이)을 빠짐없이 구현하는 연습" },
+      { "site": "프로그래머스", "title": "방문 길이", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/49994", "note": "좌표 이동, 경계 처리, 지나간 길을 중복 없이 기록하기" },
+      { "site": "프로그래머스", "title": "다리를 지나는 트럭", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42583", "note": "시간 단위로 큐를 갱신하는 시뮬레이션" },
+      { "site": "프로그래머스", "title": "기능개발", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42586", "note": "진도 계산과 배포 순서 규칙 (스택/큐 단원)" },
+      { "site": "프로그래머스", "title": "[1차] 프렌즈4블록", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/17679", "note": "격자에서 지우고 떨어뜨리기를 반복하는 구현" },
+      { "site": "프로그래머스", "title": "표 편집", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/81303", "note": "행 삭제·복구 명령을 처리한다. 최대 100만 행이라 자료구조 설계가 필요해서 B형과 비슷하다" },
+      { "site": "프로그래머스", "title": "표 병합", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/150366", "note": "셀 병합·값 변경 명령을 받아 상태를 관리한다. 명령형 구현의 대표 유형" }
+    ],
+    "hash-trie": [
+      { "site": "프로그래머스", "title": "전화번호 목록", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42577", "level": "Lv.2", "note": "접두어 판별. 접두사 dict 방식으로 풀 수 있다" },
+      { "site": "프로그래머스", "title": "베스트앨범", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42579", "level": "Lv.3", "note": "장르별 합계와 정렬 규칙을 dict로 구현" },
+      { "site": "프로그래머스", "title": "[3차] 자동완성", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/17685", "level": "Lv.4", "note": "트라이 심화. 단어가 많아서 접두사 dict로는 메모리가 부담된다" }
+    ],
+    "union-find": [
+      { "site": "프로그래머스", "title": "섬 연결하기", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42861", "level": "Lv.3", "note": "최소 신장 트리. 크루스칼에서 유니온 파인드로 사이클을 판별한다" },
+      { "site": "프로그래머스", "title": "호텔 방 배정", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/64063", "level": "Lv.4", "note": "'다음에 비어 있는 방'을 유니온 파인드로 찾는 응용" },
+      { "site": "프로그래머스", "title": "표 병합", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/150366", "note": "그룹 병합과 명령 처리를 함께 구현하는 심화" }
+    ],
+    "dfs": [
+      { "site": "프로그래머스", "title": "네트워크", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43162", "note": "연결된 컴퓨터 묶음의 개수 (이 사이트의 섬 개수와 같은 생각)" },
+      { "site": "프로그래머스", "title": "단어 변환", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43163", "note": "DFS로도 BFS로도 풀 수 있다. 둘 다 풀어서 비교해 보자" }
+    ],
+    "bfs": [
+      { "site": "프로그래머스", "title": "게임 맵 최단거리", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/1844", "note": "격자 BFS의 기본. 이 사이트의 미로 탈출과 같다" },
+      { "site": "프로그래머스", "title": "단어 변환", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43163", "note": "한 글자만 다른 단어를 이웃으로 보는 BFS" },
+      { "site": "프로그래머스", "title": "가장 먼 노드", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/49189", "note": "그래프 BFS. 거리별로 개수를 센다" },
+      { "site": "프로그래머스", "title": "블록 이동하기", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/60063", "note": "상태가 (위치, 방향)으로 늘어나는 BFS 심화" }
+    ],
+    "binary-search": [
+      { "site": "프로그래머스", "title": "입국심사", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43238", "level": "Lv.3", "note": "이 사이트의 입국 심사와 같은 유형. 먼저 이 사이트 문제를 푼 뒤 도전" },
+      { "site": "프로그래머스", "title": "징검다리", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43236", "level": "Lv.4", "note": "'최솟값의 최댓값'을 구하는 파라메트릭 서치 (최댓값 템플릿 연습)" }
+    ],
+    "heap": [
+      { "site": "프로그래머스", "title": "더 맵게", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42626", "note": "가장 작은 두 값을 반복해서 꺼내는 힙 기본 문제" },
+      { "site": "프로그래머스", "title": "이중우선순위큐", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42628", "note": "최댓값·최솟값 삭제를 모두 지원해야 한다. 지연 삭제를 떠올려 보자" },
+      { "site": "프로그래머스", "title": "디스크 컨트롤러", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42627", "note": "시간에 따라 요청이 들어오는 우선순위 처리 (힙 + 시뮬레이션)" }
+    ],
+    "dijkstra": [
+      { "site": "프로그래머스", "title": "배달", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12978", "note": "다익스트라 기본. 1번 마을에서 K 이하인 마을 세기" },
+      { "site": "프로그래머스", "title": "합승 택시 요금", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/72413", "note": "시작점을 바꿔 가며 다익스트라를 여러 번 쓰는 응용" }
+    ],
+    "segment-tree": [
+      { "site": "백준", "title": "2357 최솟값과 최댓값", "url": "https://www.acmicpc.net/problem/2357", "note": "이 사이트의 센서 편차 측정과 거의 같은 구조 (값 수정만 없다)" },
+      { "site": "백준", "title": "10868 최솟값", "url": "https://www.acmicpc.net/problem/10868", "note": "최솟값 트리만 만들면 된다. 입문용" },
+      { "site": "백준", "title": "세그먼트 트리 설명 (알고리즘 책)", "url": "https://book.acmicpc.net/ds/segment-tree", "note": "백준에서 제공하는 설명. 이 강의와 함께 읽어 보자" }
+    ],
+    "tree": [
+      { "site": "프로그래머스", "title": "길 찾기 게임", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42892", "note": "좌표로 이진 트리를 만들고 순회한다. 재귀 깊이에 주의" },
+      { "site": "프로그래머스", "title": "표 편집", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/81303", "note": "삭제·복구를 연결 리스트로 처리하는 자료구조 설계 문제" }
+    ]
+  },
+  "note": {
+    "segment-tree": "프로그래머스에서는 세그먼트 트리가 꼭 필요한 문제를 찾지 못해서, 같은 유형의 대표 문제가 있는 백준을 대신 넣었습니다."
+  }
+}

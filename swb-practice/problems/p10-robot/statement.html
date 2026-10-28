@@ -1,0 +1,68 @@
+<h2>문제 설명</h2>
+<p>창고 바닥은 N × N 격자이다. 각 칸은 빈 칸(0)이거나 벽(1)이다. 이 격자 위에서 로봇들이 움직인다. 한 칸에는 로봇이 최대 한 대만 있을 수 있다.</p>
+<p>로봇은 방향을 가지고 있고, 방향 번호는 다음과 같다.</p>
+<table>
+  <tr><th>번호</th><th>방향</th><th>한 칸 움직이면</th></tr>
+  <tr><td>0</td><td>위</td><td>행 번호가 1 줄어든다</td></tr>
+  <tr><td>1</td><td>오른쪽</td><td>열 번호가 1 늘어난다</td></tr>
+  <tr><td>2</td><td>아래</td><td>행 번호가 1 늘어난다</td></tr>
+  <tr><td>3</td><td>왼쪽</td><td>열 번호가 1 줄어든다</td></tr>
+</table>
+<p>행과 열 번호는 0부터 시작하고, 시계 방향으로 90도 돌면 방향 번호가 1 늘어난다 (3에서 돌면 0이 된다).</p>
+
+<h2>구현할 함수</h2>
+<pre><code>def init(N: int, mMap: list) -&gt; None</code></pre>
+<p>각 테스트 케이스의 처음에 호출된다. <code>mMap[r][c]</code>가 1이면 벽이다. 로봇은 한 대도 없는 상태로 시작한다.</p>
+
+<pre><code>def addRobot(mId: int, mR: int, mC: int, mDir: int) -&gt; int</code></pre>
+<p>번호가 <code>mId</code>인 로봇을 (<code>mR</code>, <code>mC</code>)에 <code>mDir</code> 방향으로 놓고 1을 반환한다.<br>
+다음 중 하나라면 놓지 않고 <b>0</b>을 반환한다.</p>
+<ul>
+  <li>같은 번호의 로봇이 이미 있다.</li>
+  <li>그 칸이 벽이다.</li>
+  <li>그 칸에 다른 로봇이 있다.</li>
+</ul>
+
+<pre><code>def removeRobot(mId: int) -&gt; int</code></pre>
+<p><code>mId</code> 로봇을 치우고 1을 반환한다. 그런 로봇이 없으면 0을 반환한다.</p>
+
+<pre><code>def rotate(mId: int, mK: int) -&gt; int</code></pre>
+<p><code>mId</code> 로봇을 시계 방향으로 <code>mK</code> × 90도 돌린다. <code>mK</code>가 음수이면 반시계 방향이다. 돌린 뒤의 방향 번호를 반환한다.</p>
+
+<pre><code>def move(mId: int, mSteps: int) -&gt; int</code></pre>
+<p><code>mId</code> 로봇이 바라보는 방향으로 <b>한 칸씩</b> 최대 <code>mSteps</code>칸 움직인다. 다음 칸이 다음 중 하나이면 거기서 멈춘다.</p>
+<ul>
+  <li>격자 밖이다.</li>
+  <li>벽이다.</li>
+  <li>다른 로봇이 있다.</li>
+</ul>
+<p>실제로 움직인 칸 수를 반환한다 (0일 수도 있다).</p>
+
+<pre><code>def whoAt(mR: int, mC: int) -&gt; int</code></pre>
+<p>(<code>mR</code>, <code>mC</code>) 칸에 있는 로봇의 번호를 반환한다. 아무도 없으면 0을 반환한다.</p>
+
+<h2>제약 사항</h2>
+<ul>
+  <li>2 ≤ N ≤ 50</li>
+  <li>1 ≤ mId ≤ 1,000</li>
+  <li>0 ≤ mDir ≤ 3, -100 ≤ mK ≤ 100, 1 ≤ mSteps ≤ 100</li>
+  <li><code>rotate</code>와 <code>move</code>는 격자 위에 있는 로봇에 대해서만 호출한다.</li>
+  <li>각 테스트 케이스에서 모든 함수를 합쳐 최대 30,000번 호출한다.</li>
+</ul>
+
+<h2>예시</h2>
+<p>N = 4, 벽은 (0, 2) 한 칸뿐이다.</p>
+<table>
+  <tr><th>호출</th><th>반환</th><th>설명</th></tr>
+  <tr><td>addRobot(1, 3, 0, 1)</td><td>1</td><td>(3,0), 오른쪽</td></tr>
+  <tr><td>addRobot(2, 3, 3, 3)</td><td>1</td><td>(3,3), 왼쪽</td></tr>
+  <tr><td>move(1, 5)</td><td>2</td><td>(3,2)까지 가고, (3,3)에 로봇 2가 있어서 멈춤</td></tr>
+  <tr><td>whoAt(3, 2)</td><td>1</td><td></td></tr>
+  <tr><td>rotate(1, -1)</td><td>0</td><td>반시계로 90도 → 위</td></tr>
+  <tr><td>move(1, 10)</td><td>2</td><td>(1,2)까지 가고, (0,2)는 벽이라 멈춤</td></tr>
+  <tr><td>addRobot(3, 0, 2, 0)</td><td>0</td><td>벽</td></tr>
+  <tr><td>addRobot(1, 0, 0, 0)</td><td>0</td><td>1번 로봇이 이미 있음</td></tr>
+  <tr><td>removeRobot(2)</td><td>1</td><td></td></tr>
+  <tr><td>removeRobot(2)</td><td>0</td><td>이미 치움</td></tr>
+  <tr><td>rotate(1, 5)</td><td>1</td><td>(0 + 5) % 4</td></tr>
+</table>

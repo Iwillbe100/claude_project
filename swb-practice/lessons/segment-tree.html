@@ -1,0 +1,84 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>"구간 [l, r]의 <b>최댓값 / 최솟값 / 합</b>"을 묻고,</li>
+  <li>중간중간 <b>한 칸의 값이 바뀌는</b> 문제</li>
+</ul>
+<p>값이 안 바뀌면 누적 합이나 희소 배열로도 되지만, 바뀐다면 세그먼트 트리가 정석이다. 질의마다 구간을 훑으면 O(N)이라 호출이 많을 때 시간 초과가 난다.</p>
+
+<h2>핵심 아이디어</h2>
+<p>배열을 절반씩 나눈 구간의 결과를 <b>트리로 미리 저장</b>해 둔다. 부모 칸에는 두 자식 구간을 합친 결과(최댓값이면 두 값 중 큰 것)가 들어 있다.</p>
+<pre class="diagram">a = [3, 8, 1, 6]        (최댓값 트리)
+
+            [1] 8             ← 전체 구간 [0..3]
+          /       \
+     [2] 8         [3] 6      ← [0..1], [2..3]
+     /   \         /   \
+  [4] 3  [5] 8  [6] 1  [7] 6  ← 리프 = 원래 값
+                                 인덱스: 리프는 size + i</pre>
+<ul>
+  <li>노드 <code>i</code>의 자식은 <code>2i</code>, <code>2i+1</code>, 부모는 <code>i // 2</code></li>
+  <li>리프는 <code>size + i</code>번 칸 (size는 N 이상인 2의 거듭제곱)</li>
+</ul>
+
+<h2>수정: 리프에서 루트까지 올라가며 다시 계산</h2>
+<p>한 칸을 바꾸면 그 칸을 포함하는 구간들만 바뀐다. 리프에서 위로 log N 칸만 갱신하면 된다.</p>
+
+<h2>질의: 필요한 구간 조각만 모은다</h2>
+<p>구간 [l, r]을 트리의 몇 개 노드로 쪼개서 결과를 합친다. 아래 반복문 방식(bottom-up)은 재귀보다 짧고 파이썬에서 빠르다. 구간을 <b>반열린 구간 [lo, hi)</b>로 바꿔서 쓴다.</p>
+
+<h2>코드: 최댓값과 최솟값을 함께</h2>
+<pre class="codeview"><code>size = 1
+mx = []
+mn = []
+
+def init(N, values):
+    global size, mx, mn
+    size = 1
+    while size &lt; N:
+        size *= 2
+    mx = [-1] * (2 * size)            # 최댓값의 항등원: 어떤 값보다도 작은 수
+    mn = [1 &lt;&lt; 31] * (2 * size)       # 최솟값의 항등원: 어떤 값보다도 큰 수
+    for i in range(N):
+        mx[size + i] = mn[size + i] = values[i]
+    for i in range(size - 1, 0, -1):
+        mx[i] = max(mx[2 * i], mx[2 * i + 1])
+        mn[i] = min(mn[2 * i], mn[2 * i + 1])
+
+def update(idx, value):
+    i = idx + size
+    mx[i] = mn[i] = value
+    i &gt;&gt;= 1
+    while i:
+        mx[i] = max(mx[2 * i], mx[2 * i + 1])
+        mn[i] = min(mn[2 * i], mn[2 * i + 1])
+        i &gt;&gt;= 1
+
+def query(l, r):                       # 닫힌 구간 [l, r]
+    lo, hi = l + size, r + size + 1    # [lo, hi) 로 바꾼다
+    big, small = -1, 1 &lt;&lt; 31
+    while lo &lt; hi:
+        if lo &amp; 1:                     # lo가 오른쪽 자식이면 이 노드를 쓰고 오른쪽으로
+            big, small = max(big, mx[lo]), min(small, mn[lo])
+            lo += 1
+        if hi &amp; 1:                     # hi 바로 앞이 왼쪽 자식이면 그 노드를 쓴다
+            hi -= 1
+            big, small = max(big, mx[hi]), min(small, mn[hi])
+        lo &gt;&gt;= 1
+        hi &gt;&gt;= 1
+    return big - small</code></pre>
+
+<h2>합 트리로 바꾸려면</h2>
+<p><code>max</code>를 <code>+</code>로 바꾸고 항등원을 <b>0</b>으로 한다. 나머지는 똑같다.</p>
+
+<h2>자주 하는 실수</h2>
+<div class="callout warn">
+  <ul>
+    <li><b>항등원.</b> 범위 밖 칸(size가 N보다 클 때 남는 칸)이 질의 결과를 오염시키지 않아야 한다. 최댓값 트리는 매우 작은 수, 최솟값 트리는 매우 큰 수로 채운다.</li>
+    <li><b>닫힌/반열린 구간.</b> <code>hi = r + size + 1</code>의 <code>+ 1</code>을 빼먹으면 마지막 칸이 빠진다.</li>
+    <li><b>인덱스가 0부터인지 1부터인지.</b> 문제의 번호 체계에 맞춰 변환한다.</li>
+    <li>update를 리프만 바꾸고 끝낸다. 위쪽 노드까지 다시 계산해야 한다.</li>
+  </ul>
+</div>
+
+<h2>복잡도</h2>
+<p>초기화 O(N), 수정과 질의는 각각 O(log N). N=10만, 호출 5만 번이면 약 100만 번의 연산이다.</p>

@@ -1,0 +1,42 @@
+<h2>문제 설명</h2>
+<p>N × N 크기의 지도가 있다. 각 칸은 바다(0)이거나 땅(1)이다. 땅인 칸이 위, 아래, 왼쪽, 오른쪽으로 이어져 있으면 같은 <b>섬</b>이다. 대각선은 이어진 것으로 보지 않는다.</p>
+<p>지도에는 땅을 새로 만들 수 있다. 섬의 넓이와 섬의 개수를 계속 물어본다.</p>
+
+<h2>구현할 함수</h2>
+<pre><code>def init(N: int, mMap: list) -&gt; None</code></pre>
+<p>각 테스트 케이스의 처음에 호출된다. <code>mMap[r][c]</code>는 r행 c열 칸의 상태이다. 행과 열 번호는 0부터 시작한다.</p>
+
+<pre><code>def setLand(mR: int, mC: int) -&gt; None</code></pre>
+<p>r행 c열 칸을 땅으로 만든다. 이미 땅이면 아무것도 하지 않는다.</p>
+
+<pre><code>def getArea(mR: int, mC: int) -&gt; int</code></pre>
+<p>r행 c열 칸이 속한 섬의 넓이(칸 수)를 반환한다. 바다이면 0을 반환한다.</p>
+
+<pre><code>def countIsland() -&gt; int</code></pre>
+<p>지도 전체의 섬 개수를 반환한다.</p>
+
+<h2>제약 사항</h2>
+<ul>
+  <li>1 ≤ N ≤ 50</li>
+  <li>0 ≤ mR, mC &lt; N</li>
+  <li>각 테스트 케이스에서 <code>setLand</code>, <code>getArea</code>, <code>countIsland</code>를 합쳐 최대 500번 호출한다.</li>
+  <li>땅이 한 줄로 길게 이어져 있으면 섬의 넓이가 1,000을 넘을 수 있다.</li>
+</ul>
+
+<h2>예시</h2>
+<pre><code>1 1 0 0
+0 0 0 1
+1 0 0 1
+0 0 0 0</code></pre>
+<table>
+  <tr><th>호출</th><th>반환</th><th>설명</th></tr>
+  <tr><td>countIsland()</td><td>3</td><td>왼쪽 위, 오른쪽, 왼쪽 아래 섬</td></tr>
+  <tr><td>getArea(0, 1)</td><td>2</td><td></td></tr>
+  <tr><td>getArea(3, 3)</td><td>0</td><td>바다</td></tr>
+  <tr><td>setLand(1, 1)</td><td></td><td>왼쪽 위 섬에 붙는다</td></tr>
+  <tr><td>setLand(2, 2)</td><td></td><td>오른쪽 섬에 붙는다</td></tr>
+  <tr><td>setLand(1, 2)</td><td></td><td>두 섬을 이어 준다</td></tr>
+  <tr><td>getArea(1, 3)</td><td>7</td><td>3 + 3 + 1</td></tr>
+  <tr><td>countIsland()</td><td>2</td><td></td></tr>
+</table>
+<p class="hint">힌트: 재귀로 DFS를 짜면 깊이가 1,000을 넘을 수 있다. <code>sys.setrecursionlimit</code>으로 한도를 늘리거나, 스택을 직접 써서 반복문으로 짜자.</p>

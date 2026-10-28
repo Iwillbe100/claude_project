@@ -1,0 +1,54 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>격자나 그래프에서 <b>최소 이동 횟수</b>를 구할 때 (한 칸 이동의 비용이 모두 같을 때)</li>
+  <li>"가장 가까운 ○○", "몇 번 만에 갈 수 있나"</li>
+</ul>
+<p>길마다 걸리는 시간이 다르면 BFS가 아니라 <b>다익스트라</b>이다.</p>
+
+<h2>핵심 아이디어</h2>
+<p>출발점에서 가까운 칸부터 차례로 퍼져 나간다. 거리 0인 칸, 거리 1인 칸, 거리 2인 칸… 순서로 큐에서 꺼내므로, <b>어떤 칸에 처음 도착한 순간의 거리가 곧 최단 거리</b>이다.</p>
+<pre class="diagram">S = 출발, 숫자 = 최단 거리, # = 벽
+
+ S 1 2 3          S에서 시작: 큐 = [S]
+ 1 # # 4          꺼낸 칸의 이웃에 거리+1을 적고 큐에 넣는다
+ 2 3 4 5          큐가 빌 때까지 반복</pre>
+
+<h2>코드</h2>
+<pre class="codeview"><code>from collections import deque
+
+def shortest(sr, sc, er, ec):
+    if grid[sr][sc] == 1 or grid[er][ec] == 1:      # 출발·도착이 벽
+        return -1
+    dist = [[-1] * n for _ in range(n)]             # -1 = 아직 안 가 봄
+    dist[sr][sc] = 0
+    q = deque([(sr, sc)])
+    while q:
+        r, c = q.popleft()
+        if r == er and c == ec:                     # 도착하면 바로 종료
+            return dist[r][c]
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and grid[nr][nc] == 0 and dist[nr][nc] &lt; 0:
+                dist[nr][nc] = dist[r][c] + 1       # 큐에 넣을 때 거리를 기록
+                q.append((nr, nc))
+    return -1                                       # 큐가 비도록 못 갔다</code></pre>
+
+<h2>DFS와 무엇이 다른가</h2>
+<table>
+  <tr><th></th><th>DFS</th><th>BFS</th></tr>
+  <tr><td>자료구조</td><td>스택 / 재귀</td><td>큐 (<code>deque</code>)</td></tr>
+  <tr><td>잘하는 일</td><td>영역 넓이, 모든 경우 탐색</td><td>최소 이동 횟수</td></tr>
+  <tr><td>처음 도착한 경로가 최단인가</td><td>아니다</td><td>그렇다</td></tr>
+</table>
+
+<h2>자주 하는 실수</h2>
+<div class="callout warn">
+  <ul>
+    <li><b>방문 처리 시점.</b> 큐에서 <i>꺼낼 때</i> 처리하면 같은 칸이 큐에 여러 번 들어가서 느려진다. <i>넣을 때</i> 처리한다. 위 코드는 <code>dist</code>를 넣을 때 기록해서 방문 표시도 겸한다.</li>
+    <li><code>list.pop(0)</code>은 O(N)이다. 반드시 <code>deque.popleft()</code>를 쓴다.</li>
+    <li>출발 칸이 벽인 경우, 출발 = 도착인 경우(0)를 따로 생각한다.</li>
+    <li>호출마다 <code>dist</code>를 새로 만든다. 벽이 바뀔 수 있으므로 이전 결과를 재사용하면 안 된다.</li>
+  </ul>
+</div>
+
+<h2>복잡도</h2>
+<p>한 번의 BFS는 O(칸 수) = O(N²). N ≤ 40이고 호출이 1,000번이면 약 160만 칸 × 4방향으로 충분히 풀린다.</p>

@@ -1,0 +1,147 @@
+# =============================================================================
+# requirements.lock.txt  --  LangGraph 실습 환경의 단일 설치 파일
+# -----------------------------------------------------------------------------
+#   기준 인터프리터 : CPython 3.12.x  (다른 버전도 설치는 되지만 검증되지 않았다 -> verify_env C01 이 FAIL)
+#   설치            : python -m pip install --require-virtualenv -r settings/requirements.lock.txt
+#   검증            : python settings/scripts/verify_env.py
+#   (둘 다 킷 폴더에서, 프로젝트 .venv 의 python 으로. SETUP.md "빠른 시작" 참고)
+#
+# 플랫폼 차이: macOS/Linux 에서는 langgraph-api 가 uvloop · httptools 를 더 요구해 81개가 된다
+# (Windows 에서 계산한 lock 이라 이 둘은 고정돼 있지 않다). Intel Mac 은 cryptography==50.0.1
+# wheel 이 없어 소스 빌드로 떨어진다 -> SETUP.md 부록 B.
+#
+# 이 파일을 수정하지 말 것. 버전을 바꾸면 강사 환경과 달라진다.
+# extras 표기([inmem] 등)를 쓰지 않으므로, pip 의 -c 제약 파일로도 그대로 재사용할 수 있다.
+#
+# -----------------------------------------------------------------------------
+# 왜 79개나 되는가 (직접 세어 확인한 수치)
+# -----------------------------------------------------------------------------
+# 아래 4계층은 "직접 의존성 9종에서 출발한 의존성 폐포"를 실제로 계산해 나눈 것이다.
+# 군더더기는 0건이다. 즉 어느 한 줄을 지워도 설치 결과가 줄지 않는다.
+# pip 이 어차피 의존성으로 다시 끌어오되, 이번에는 **버전이 고정되지 않은 채로**
+# 들어온다. 지우면 환경이 가벼워지는 게 아니라 재현성만 잃는다.
+#
+#   T1  9개  실습 코드가 직접 import / 실행하는 것
+#   T2  3개  `langgraph dev`(Studio 실시간 노드 추적) 3종 세트
+#   T3 35개  T1 이 요구하는 전이 의존성
+#   T4 32개  T2 가 요구하는 전이 의존성   <- "그래프와 무관해 보이는" 것들이 전부 여기
+#
+# T4 를 없애는 유일한 방법은 T2(`langgraph dev`)를 포기하는 것이다. 그러면 44개까지
+# 줄지만 Studio 화면에서 노드가 하나씩 점등되는 실시간 추적을 볼 수 없게 된다.
+# 이 교육과정의 핵심 요구사항이므로 T2/T4 를 유지한다.
+# (LangSmith 웹 트레이스 자체는 T1 만으로도 남는다. Studio 실시간 화면만 사라진다.)
+# =============================================================================
+
+
+# =============================================================================
+# T1. 실습 코드가 직접 쓰는 것 (9)
+# =============================================================================
+langgraph==1.2.11                 # StateGraph / 노드 / 엣지 / 스트리밍 런타임
+langgraph-checkpoint==4.2.0       # 상태 직렬화 · 체크포인터 인터페이스
+langgraph-prebuilt==1.1.0         # ToolNode 등 사전 제작 노드
+langgraph-sdk==0.4.4              # Agent Server 클라이언트
+langchain-core==1.6.1             # Runnable 기반 클래스. 노드 span 이 여기서 생성된다
+langsmith==0.12.1                 # 트레이스 전송 클라이언트
+python-dotenv==1.2.3              # .env 로딩
+PyYAML==6.0.3                     # 워크플로 설정 파싱
+pytest==9.1.1                     # 검증 테스트
+
+
+# =============================================================================
+# T2. `langgraph dev` = Studio 실시간 노드 추적 3종 세트 (3)
+#     Docker 없이 로컬 Agent Server 를 띄우는 조합. 하나라도 빠지면 기동 실패.
+# =============================================================================
+langgraph-cli==0.4.31             # `langgraph dev` 명령
+langgraph-api==0.13.3             # 로컬 Agent Server 본체
+langgraph-runtime-inmem==0.33.3   # 인메모리 런/스레드 저장소
+
+
+# =============================================================================
+# T3. T1 이 요구하는 전이 의존성 (35)
+#     그래프 실행 · 스키마 검증 · LangSmith 전송에 실제로 쓰인다.
+# =============================================================================
+annotated-types==0.8.0
+anyio==4.14.2
+certifi==2026.7.22
+charset-normalizer==3.5.1
+colorama==0.4.6
+distro==1.9.0
+h11==0.16.0
+httpcore==1.0.9
+httpcore2==2.12.0
+httpx==0.28.1
+httpx2==2.12.0                    # langsmith 전용 HTTP 스택 (httpx 와 별개 패키지다)
+idna==3.19
+iniconfig==2.3.0
+jsonpatch==1.33
+jsonpointer==3.1.1
+langchain-protocol==0.0.19        # core <-> api 공용 메시지 스키마
+orjson==3.12.0
+ormsgpack==1.12.2                 # 체크포인트 직렬화
+packaging==26.3
+pluggy==1.6.0
+pydantic==2.13.5                  # State 스키마 검증
+pydantic_core==2.46.5
+Pygments==2.21.0
+requests==2.34.2
+requests-toolbelt==1.0.0
+sniffio==1.3.1
+tenacity==9.1.4
+truststore==0.10.4
+typing_extensions==4.16.0
+typing-inspection==0.4.4
+urllib3==2.7.0
+uuid_utils==0.17.0
+websockets==16.1.1
+xxhash==4.0.1
+zstandard==0.25.0
+
+
+# =============================================================================
+# T4. T2(`langgraph dev`)가 요구하는 전이 의존성 (32)
+# -----------------------------------------------------------------------------
+# 여기가 "그래프 엔지니어링과 무관해 보이는" 목록이다. 실제 정체는 다음과 같다.
+#
+#   uvicorn · starlette · sse-starlette · watchfiles  -> Agent Server 웹 서버와
+#       SSE 스트리밍. 노드 상태가 브라우저로 실시간으로 흐르는 통로가 이것이다.
+#   opentelemetry-* (7) · prometheus_client           -> 서버 자체 계측/메트릭
+#   grpcio-* (3) · protobuf · googleapis-common-protos-> 런타임 내부 RPC
+#   cryptography · cffi · pycparser · PyJWT           -> 서버 인증 계층
+#   blockbuster · forbiddenfruit                      -> 이벤트 루프 블로킹 탐지
+#   croniter · python-dateutil · six                  -> 예약 실행(cron) 지원
+#   structlog · click · pathspec · cloudpickle · jsonschema_rs · setuptools
+#
+# 전부 langgraph-api / langgraph-runtime-inmem 의 하드 의존성이라 선택 설치가 불가능하다.
+# =============================================================================
+blockbuster==1.5.27
+cffi==2.1.1
+click==8.5.0
+cloudpickle==3.1.2
+croniter==6.2.4
+cryptography==50.0.1
+forbiddenfruit==0.1.4
+googleapis-common-protos==1.75.2
+grpcio==1.81.1
+grpcio-health-checking==1.81.1
+grpcio-tools==1.81.1
+jsonschema_rs==0.44.1
+opentelemetry-api==1.42.1
+opentelemetry-exporter-otlp-proto-common==1.42.1
+opentelemetry-exporter-otlp-proto-http==1.42.1
+opentelemetry-exporter-prometheus==0.63b1
+opentelemetry-proto==1.42.1
+opentelemetry-sdk==1.42.1
+opentelemetry-semantic-conventions==0.63b1
+pathspec==1.1.1
+prometheus_client==0.26.0
+protobuf==6.33.6
+pycparser==3.0
+PyJWT==2.13.0
+python-dateutil==2.9.0.post0
+setuptools==84.0.0                # grpcio-tools 의 의존성 (킷은 pip install -e . 를 하지 않는다 — SETUP STEP 9)
+six==1.17.0
+sse-starlette==3.3.4
+starlette==1.6.0
+structlog==25.5.0
+uvicorn==0.52.4
+watchfiles==1.2.0

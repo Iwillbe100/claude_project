@@ -1,0 +1,257 @@
+{
+  "_comment": "루프 킷의 검사 계약. 그래프 결과도 이 기준으로 잰다. 바꾸면 비교가 깨진다.",
+  "request": {
+    "country": "일본",
+    "days": 4,
+    "style": {
+      "preferred": [
+        "맛집",
+        "휴식",
+        "쇼핑"
+      ],
+      "not_preferred": [
+        "여행일정에서 많이 걸어야하는건 싫어"
+      ],
+      "detailed": [
+        "오사카-고베를 갈꺼야. 고베마라톤에 참가하면서 겸사겸사 가는거야",
+        "11/15일 대회야. 대회를 뛰어야해서 여행일정에서 많이 걸어야하는건 싫어",
+        "여행 일정은 11/13~16(3박4일)"
+      ]
+    },
+    "city_priority": [
+      "내 취향",
+      "유명도",
+      "교통"
+    ]
+  },
+  "count_contract": {
+    "strictness": "개수와출처와분량",
+    "distinct_source_mode": "url",
+    "min_chars": {
+      "evidence_item": 60,
+      "spot_detail": 300,
+      "why_selected": 120,
+      "preference_note_line": 30,
+      "itinerary_block_why": 40
+    },
+    "dedup": {
+      "min_unique_line_ratio": 0.9,
+      "max_pair_similarity": 0.6,
+      "shingle_size": 8
+    },
+    "asset_rule": {
+      "require_verified": true,
+      "verified_fields": [
+        "status",
+        "content_type",
+        "checked_at"
+      ],
+      "allowed_status": [
+        200
+      ],
+      "content_type_prefix": "image/",
+      "banned_url_substrings": [
+        "upload.wikimedia.org"
+      ],
+      "recommended_form": "https://commons.wikimedia.org/wiki/Special:FilePath/<파일명>?width=1024"
+    },
+    "country_intro": {
+      "매력": {
+        "kind": "다건",
+        "target": 3,
+        "distinct_sources": 2
+      },
+      "역사": {
+        "kind": "다건",
+        "target": 3,
+        "distinct_sources": 2
+      },
+      "문화": {
+        "kind": "다건",
+        "target": 3,
+        "distinct_sources": 2
+      },
+      "주의사항": {
+        "kind": "다건",
+        "target": 3,
+        "distinct_sources": 2
+      },
+      "국가상태": {
+        "kind": "조건부",
+        "target": 1
+      },
+      "항공권가격": {
+        "kind": "단건",
+        "target": 1
+      },
+      "환율": {
+        "kind": "단건",
+        "target": 1
+      },
+      "교통개요": {
+        "kind": "단건",
+        "target": 1
+      },
+      "국기이미지": {
+        "kind": "자산",
+        "target": 1
+      },
+      "대표이미지": {
+        "kind": "자산",
+        "target": 1
+      }
+    },
+    "cities": {
+      "city_count": 2,
+      "spots_per_city": 3,
+      "evidence_per_spot": {
+        "kind": "다건",
+        "target": 3,
+        "distinct_sources": 2
+      },
+      "image_per_spot": {
+        "kind": "자산",
+        "target": 1
+      },
+      "preference_note_min_lines": 15
+    },
+    "itinerary": {
+      "evidence_per_city": {
+        "kind": "다건",
+        "target": 2,
+        "distinct_sources": 2
+      },
+      "days_per_city": 4,
+      "blocks_per_day_min": 4,
+      "spot_blocks_per_day_min": 1,
+      "time_format": "HH:MM",
+      "block_kinds": [
+        "명소",
+        "식사",
+        "이동",
+        "휴식"
+      ]
+    }
+  },
+  "page_contract": {
+    "output_file": "output/travel_site.html",
+    "single_file": true,
+    "strictness": "내용대조",
+    "min_chars": {
+      "panel_floor": 60,
+      "conditional_slot_chars": 20
+    },
+    "feature1": {
+      "layout": "accordion",
+      "flag_image": true,
+      "hero_image": true,
+      "headers": [
+        "매력",
+        "역사",
+        "문화",
+        "국가상태",
+        "여행정보"
+      ],
+      "header_slots": {
+        "매력": [
+          "매력"
+        ],
+        "역사": [
+          "역사"
+        ],
+        "문화": [
+          "문화",
+          "주의사항"
+        ],
+        "국가상태": [
+          "국가상태"
+        ],
+        "여행정보": [
+          "항공권가격",
+          "환율",
+          "교통개요"
+        ]
+      }
+    },
+    "feature2": {
+      "layout": "drawer",
+      "spot_images": true,
+      "spot_detail": true,
+      "back_button": true,
+      "preference_note_min_lines": 15
+    },
+    "feature3": {
+      "layout": "accordion",
+      "per_city_days": true,
+      "time_blocks": true
+    },
+    "theme": {
+      "mode": "dark",
+      "primary": "#14B8A6"
+    }
+  },
+  "quality_contract": {
+    "passes": 3,
+    "rubric_file": "specs/QUALITY_RUBRIC.md",
+    "record_dir": "evidence/runs/<run_id>/quality",
+    "record_template": "templates/QUALITY_PASS.md",
+    "regression_command": "python scripts/verify_all.py --skip-quality",
+    "watch_files": [
+      "output/research_data.json",
+      "output/travel_site.html"
+    ],
+    "rules": [
+      "Q-반복금지",
+      "Q-취향연결",
+      "Q-뺀이유",
+      "Q-상세삼요소",
+      "Q-일정현실성",
+      "Q-근거일치",
+      "Q-도시차별화",
+      "Q-동행반영",
+      "Q-실용누락",
+      "Q-계약무결"
+    ],
+    "pass_focus": {
+      "1": [
+        "Q-반복금지",
+        "Q-취향연결",
+        "Q-뺀이유",
+        "Q-상세삼요소"
+      ],
+      "2": [
+        "Q-일정현실성",
+        "Q-근거일치",
+        "Q-도시차별화",
+        "Q-실용누락"
+      ],
+      "3": [
+        "Q-동행반영",
+        "Q-계약무결"
+      ]
+    }
+  },
+  "loops": {
+    "A": {
+      "name": "정보량 충족",
+      "limit": 3,
+      "verifier": "python scripts/check_information_count.py"
+    },
+    "B": {
+      "name": "페이지 완성",
+      "limit": 3,
+      "verifier": "python scripts/check_page_contract.py"
+    },
+    "C": {
+      "name": "정성 완성도",
+      "limit": 3,
+      "verifier": "python scripts/check_quality_passes.py"
+    }
+  },
+  "options": {
+    "same_error_limit": 2,
+    "max_iterations": 10,
+    "final_verifier_command": "python scripts/verify_all.py",
+    "success_condition": "python scripts/verify_all.py exit 0 + 사람이 브라우저로 열어 확인"
+  }
+}

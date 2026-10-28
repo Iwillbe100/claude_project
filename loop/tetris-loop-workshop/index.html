@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TETRIS LOOP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <h1>TETRIS LOOP</h1>
+  <div class="layout">
+    <div class="board-area">
+      <div id="board" class="board"></div>
+      <p id="pause-note" class="pause-note" hidden>일시정지 · P를 누르면 계속</p>
+      <button id="start" type="button">시작</button>
+    </div>
+    <aside class="panel">
+      <section class="hold" aria-labelledby="hold-title">
+        <h2 id="hold-title">홀드 (C)</h2>
+        <div id="hold-preview" class="next-preview hold-preview"></div>
+      </section>
+      <section class="next" aria-labelledby="next-title">
+        <h2 id="next-title">다음 블록</h2>
+        <div id="next-preview" class="next-preview"></div>
+      </section>
+      <dl>
+        <dt>점수</dt>
+        <dd id="score">0</dd>
+        <dt>제거한 줄</dt>
+        <dd id="lines">0</dd>
+        <dt>레벨</dt>
+        <dd id="level">1</dd>
+        <dt>게임 상태</dt>
+        <dd id="status">READY</dd>
+      </dl>
+      <section class="records" aria-labelledby="records-title">
+        <form id="save-form" class="save-form" hidden>
+          <label for="player-name">이름 (2~10자)</label>
+          <div class="save-row">
+            <input id="player-name" name="player-name" type="text" autocomplete="off">
+            <button id="save" type="submit">기록 저장</button>
+          </div>
+        </form>
+        <p id="save-message" class="save-message" role="status"></p>
+        <h2 id="records-title">최고 기록</h2>
+        <ol id="leaderboard" class="leaderboard"></ol>
+        <p id="leaderboard-message" class="leaderboard-message"></p>
+      </section>
+    </aside>
+  </div>
+  <p class="controls">← → ↓ 이동 · ↑ 회전 · Space 하드 드롭 · P 일시정지</p>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "travel-graph-starter"
+version = "0.1.0"
+description = "루프 킷의 세 루프를 LangGraph 그래프로 옮기는 실습 킷"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[tool.setuptools]
+packages = ["travel_graph"]

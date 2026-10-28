@@ -1,0 +1,51 @@
+# =============================================================================
+# requirements-optional.txt  --  기본 설치 대상이 "아님"
+# -----------------------------------------------------------------------------
+# 강사 기준 환경에는 아래 패키지가 들어 있지 않다. 설치하는 순간부터
+# 교육생 환경 != 강사 환경이 된다. 커리큘럼이 명시적으로 지시할 때만 설치한다.
+#
+# 설치할 때는 반드시 lock 을 제약 파일로 함께 걸어, 이미 맞춰 둔 79개 버전이
+# 몰래 올라가지 않게 막는다 (lock 은 extras 표기가 없어 -c 로 그대로 쓸 수 있다):
+#
+#   python -m pip install --require-virtualenv \
+#       -r settings/requirements-optional.txt \
+#       -c settings/requirements.lock.txt
+#
+# 설치 후에는 반드시 다시 검증한다:
+#   python settings/scripts/verify_env.py
+#
+# pip 이 "ResolutionImpossible" 을 내면 그것은 오류가 아니라 정상 신호다.
+# 해당 패키지가 langchain-core==1.6.1 과 호환되지 않는다는 뜻이므로 버전을 낮춰
+# 잡거나 강사에게 확인한 조합을 쓴다. 절대로 -c 를 빼고 재시도하지 말 것
+# (트레이싱이 예외 없이 조용히 끊기는 가장 흔한 원인이다).
+# =============================================================================
+
+# --- LLM 프로바이더 바인딩 (그래프 노드에서 모델을 직접 호출할 때) --------------
+# 버전을 고정하지 않는다. -c 가 langchain-core 를 1.6.1 에 묶으므로,
+# pip 이 그 제약을 만족하는 최신 버전을 고르게 둔다.
+#
+# ※ 이 킷(travel_graph)은 이것을 쓰지 않는다. 노드가 모델을 직접 호출하는 대신
+#    `claude -p` 서브프로세스를 부르기 때문이다. 그 경로는 API 키가 아니라
+#    **구독 계정 인증**을 쓰므로 langchain-anthropic 도, ANTHROPIC_API_KEY 도
+#    필요 없다. 오히려 ANTHROPIC_API_KEY 가 환경에 있으면 구독 인증을 이기므로
+#    `.env.example` 에 그 슬롯을 추가하지 않는 것이 요구사항이다.
+# langchain-anthropic
+# langchain-openai
+
+# --- 상태 영속화(체크포인터) 실습용 ---------------------------------------------
+# 인메모리 체크포인터 대신 SQLite/Postgres 로 스레드를 보존할 때만 필요하다.
+#
+# ※ 이 킷의 게이트(`human_gate_a` · `human_gate_b` 의 `interrupt`)는 이것 없이도
+#    동작한다.
+#    - Studio(`langgraph dev`) : Agent Server 가 스레드 영속화를 담당한다
+#    - 순수 파이썬 · pytest    : `InMemorySaver`(langgraph-checkpoint 에 포함, 기설치)
+#    아래는 "서버 없이 하루 뒤 재개"를 파일로 재현해 보고 싶을 때만 푼다.
+#    (실행 근거 자체는 `evidence/runs/<run_id>/` 에 파일로 남으므로 체크포인터가
+#     아니어도 조사 결과가 사라지지는 않는다.)
+# langgraph-checkpoint-sqlite
+# langgraph-checkpoint-postgres
+
+# --- 그래프 구조 시각화 ----------------------------------------------------------
+# graph.get_graph().draw_mermaid() 는 추가 설치 없이 동작한다.
+# draw_ascii() 를 쓸 때만 필요하다.
+# grandalf

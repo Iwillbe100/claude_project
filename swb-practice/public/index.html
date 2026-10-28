@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SW B형 연습</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/">SW B형 연습 <span class="badge">Python</span></a>
+    <nav>
+      <a href="#/" data-nav="home">문제</a>
+      <a href="#/learn" data-nav="learn">학습</a>
+      <a href="#/submissions" data-nav="submissions">제출 기록</a>
+    </nav>
+    <div class="exam" id="exam">
+      <span class="exam-clock" id="examClock" title="B형 시험 시간은 4시간입니다">04:00:00</span>
+      <button class="btn small" id="examBtn">시험 모드 시작</button>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <template id="tpl-home">
+    <section class="home">
+      <div class="hero">
+        <h1>삼성 SW 역량테스트 B형 연습</h1>
+        <p>B형처럼 <code>main.py</code>가 내 <code>solution.py</code>의 함수를 호출해서 채점합니다. 테스트 케이스마다 반환값이 모두 맞으면 100점입니다.</p>
+        <div class="stats" id="stats"></div>
+        <a class="learn-banner" href="#/learn">
+          <strong>풀기 어려우면 먼저 학습 탭부터</strong>
+          <span>알고리즘 강의 12편, 문제별 단계 힌트, 프로그래머스 비슷한 유형 문제 링크가 있습니다 →</span>
+        </a>
+      </div>
+      <div class="problem-grid" id="problemGrid"></div>
+    </section>
+  </template>
+
+  <template id="tpl-problem">
+    <section class="workspace">
+      <div class="pane left">
+        <div class="pane-head">
+          <div class="title-row">
+            <a href="#/" class="back" aria-label="목록으로">←</a>
+            <h2 id="pTitle"></h2>
+          </div>
+          <div class="meta" id="pMeta"></div>
+          <div class="tabs" id="leftTabs">
+            <button data-tab="statement" class="active">문제</button>
+            <button data-tab="hint">힌트</button>
+            <button data-tab="lesson">학습</button>
+            <button data-tab="main">main.py</button>
+            <button data-tab="sample">샘플 입력</button>
+            <button data-tab="history">내 제출</button>
+            <button data-tab="solution">모범 답안</button>
+          </div>
+        </div>
+        <div class="pane-body" id="leftBody"></div>
+      </div>
+
+      <div class="pane right">
+        <div class="toolbar">
+          <span class="file">solution.py</span>
+          <span class="spacer"></span>
+          <button class="btn ghost small" id="resetBtn">초기화</button>
+          <label class="toggle"><input type="checkbox" id="customToggle"> 직접 입력</label>
+          <button class="btn small" id="runBtn">샘플 실행 <kbd>Ctrl+'</kbd></button>
+          <button class="btn primary small" id="submitBtn">제출 <kbd>Ctrl+Enter</kbd></button>
+        </div>
+        <div class="editor-wrap"><textarea id="editor" spellcheck="false"></textarea></div>
+        <div class="custom-input hidden" id="customBox">
+          <div class="label">직접 입력 (main.py에 그대로 전달됩니다. 첫 줄: <code>T MARK</code>)</div>
+          <textarea id="customInput" spellcheck="false"></textarea>
+        </div>
+        <div class="result" id="result">
+          <div class="result-empty">샘플을 실행하거나 제출하면 결과가 여기에 표시됩니다.</div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-learn">
+    <section class="learn">
+      <h1>학습</h1>
+      <p class="lead">위에서부터 순서대로 읽는 것을 권합니다. 각 강의 끝에 연결된 연습 문제가 있고, 문제 화면의 <b>힌트</b> 탭에서 한 단계씩 도움을 받을 수 있습니다.</p>
+      <div class="progress" id="learnProgress"></div>
+      <div id="lessonGroups"></div>
+      <h2 class="level" style="margin-top:40px">비슷한 유형의 외부 문제 모음</h2>
+      <p class="lead" id="practiceIntro"></p>
+      <div id="practiceGroups"></div>
+    </section>
+  </template>
+
+  <template id="tpl-lesson">
+    <article class="lesson">
+      <a href="#/learn" class="back-link">← 학습 목록</a>
+      <header>
+        <div class="lesson-meta" id="lessonMeta"></div>
+        <h1 id="lessonTitle"></h1>
+      </header>
+      <div class="lesson-body" id="lessonBody"></div>
+      <footer class="lesson-foot" id="lessonFoot"></footer>
+    </article>
+  </template>
+
+  <template id="tpl-submissions">
+    <section class="submissions">
+      <h1>제출 기록</h1>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>#</th><th>문제</th><th>결과</th><th>점수</th><th>시간</th><th>제출 시각</th><th></th></tr></thead>
+          <tbody id="subBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </template>
+
+  <dialog id="codeDialog">
+    <div class="dialog-head"><strong id="codeDialogTitle"></strong><button class="btn ghost small" id="codeDialogClose">닫기</button></div>
+    <pre id="codeDialogBody"></pre>
+    <div class="dialog-foot"><button class="btn small" id="codeDialogLoad">에디터로 불러오기</button></div>
+  </dialog>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

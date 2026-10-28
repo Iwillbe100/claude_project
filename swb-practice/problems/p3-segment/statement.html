@@ -1,0 +1,32 @@
+<h2>문제 설명</h2>
+<p>공장에 센서 N개가 한 줄로 설치되어 있고, 왼쪽부터 0번에서 N-1번까지 번호가 붙어 있다. 센서마다 측정값이 있으며, 측정값은 수시로 바뀐다.</p>
+<p>관리자는 연속한 센서 구간을 골라 그 구간의 <b>편차</b>를 확인하려고 한다. 편차는 구간 안에서 가장 큰 측정값에서 가장 작은 측정값을 뺀 값이다.</p>
+
+<h2>구현할 함수</h2>
+<pre><code>def init(N: int, mValue: list) -&gt; None</code></pre>
+<p>각 테스트 케이스의 처음에 호출된다. 센서는 N개이고, <code>mValue[i]</code>는 i번 센서의 처음 측정값이다.</p>
+
+<pre><code>def update(mIdx: int, mValue: int) -&gt; None</code></pre>
+<p><code>mIdx</code>번 센서의 측정값을 <code>mValue</code>로 바꾼다.</p>
+
+<pre><code>def query(mFrom: int, mTo: int) -&gt; int</code></pre>
+<p><code>mFrom</code>번부터 <code>mTo</code>번까지(<code>mFrom</code>과 <code>mTo</code> 포함) 센서들의 측정값 중 최댓값에서 최솟값을 뺀 값을 반환한다.</p>
+
+<h2>제약 사항</h2>
+<ul>
+  <li>1 ≤ N ≤ 100,000</li>
+  <li>0 ≤ 측정값 ≤ 1,000,000,000</li>
+  <li>0 ≤ mFrom ≤ mTo ≤ N-1</li>
+  <li>각 테스트 케이스에서 <code>update</code>와 <code>query</code>를 합쳐 최대 50,000번 호출한다.</li>
+</ul>
+
+<h2>예시</h2>
+<p>N = 5, mValue = [3, 8, 1, 6, 4]</p>
+<table>
+  <tr><th>호출</th><th>반환</th><th>설명</th></tr>
+  <tr><td>query(0, 4)</td><td>7</td><td>8 - 1</td></tr>
+  <tr><td>query(3, 4)</td><td>2</td><td>6 - 4</td></tr>
+  <tr><td>update(1, 2)</td><td></td><td>[3, 2, 1, 6, 4]</td></tr>
+  <tr><td>query(0, 2)</td><td>2</td><td>3 - 1</td></tr>
+</table>
+<p class="hint">힌트: Q번의 질의를 매번 O(N)으로 처리하면 시간 초과가 날 수 있다.</p>

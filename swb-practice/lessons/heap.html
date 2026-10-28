@@ -1,0 +1,72 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>"가장 큰(작은) 값을 <b>계속</b> 꺼낸다", "상위 K명"</li>
+  <li>값이 계속 추가되는 동안 최댓값·최솟값이 필요할 때 (매번 정렬하면 느리다)</li>
+</ul>
+
+<h2>핵심 아이디어</h2>
+<p>힙은 "가장 작은 값을 O(log N)에 꺼내고, O(log N)에 넣을 수 있는" 자료구조이다. 파이썬의 <code>heapq</code>는 <b>최소 힙</b>이다.</p>
+<pre class="codeview"><code>from heapq import heappush, heappop
+
+h = []
+heappush(h, 5)
+heappush(h, 1)
+heappush(h, 3)
+heappop(h)      # 1
+h[0]            # 3 (다음에 나올 값을 꺼내지 않고 확인)</code></pre>
+
+<h2>최대 힙과 동점 처리</h2>
+<p>튜플을 넣으면 앞 칸부터 비교한다. 점수는 부호를 뒤집어 큰 점수가 먼저 나오게 하고, 두 번째 칸으로 동점 순서를 정한다.</p>
+<pre class="codeview"><code>heappush(h, (-score, user_id))
+neg, uid = heappop(h)      # 점수 높은 순, 같으면 ID 작은 순</code></pre>
+
+<h2>문제: 힙에서는 중간 값을 바꾸거나 지울 수 없다</h2>
+<p>사용자의 점수가 바뀌거나 사용자가 삭제되어도, 힙 안에는 <b>옛날 점수 항목</b>이 남아 있다. 이걸 직접 찾아서 지우기는 어렵다.</p>
+
+<h2>해결: 지연 삭제 (lazy deletion)</h2>
+<p>지우지 않고 그대로 두었다가, <b>꺼낼 때 "아직 유효한 항목인가"를 확인</b>해서 낡은 항목은 버린다. 유효한지 알기 위해 항목마다 <b>버전 번호</b>를 붙인다.</p>
+<pre class="diagram">update(7, 200)    heap: (-200, 7, v1)
+update(7, 50)     heap: (-200, 7, v1), (-50, 7, v2)    version[7] = v2
+getTop            (-200, 7, v1) 꺼냄 → version[7]은 v2 → 낡은 항목, 버린다
+                  (-50, 7, v2)  꺼냄 → 유효</pre>
+<pre class="codeview"><code>score = {}        # 사용자 → 현재 점수
+version = {}      # 사용자 → 현재 버전
+heap = []
+stamp = 0
+
+def update(uid, s):
+    global stamp
+    stamp += 1
+    score[uid] = s
+    version[uid] = stamp
+    heappush(heap, (-s, uid, stamp))
+
+def remove_user(uid):
+    if uid not in score:
+        return -1
+    del version[uid]               # 버전이 사라지면 힙의 항목은 모두 낡은 것이 된다
+    return score.pop(uid)
+
+def get_top(K, result):
+    taken = []
+    while heap and len(taken) &lt; K:
+        item = heappop(heap)
+        if version.get(item[1]) == item[2]:    # 유효한 항목만 센다
+            taken.append(item)
+    for i, item in enumerate(taken):
+        result[i] = item[1]
+        heappush(heap, item)                   # 조회만 했으니 다시 넣는다
+    return len(taken)</code></pre>
+
+<h2>자주 하는 실수</h2>
+<div class="callout warn">
+  <ul>
+    <li><b>꺼낸 유효 항목을 다시 넣지 않는다.</b> 조회만 하는 함수에서 힙이 점점 비어 버린다.</li>
+    <li><b>버전을 점수나 ID로 대신하려는 것.</b> 같은 사용자가 같은 점수로 두 번 update되면 낡은 항목과 새 항목을 구별할 수 없다. 증가하는 번호를 쓴다.</li>
+    <li><b>init에서 힙과 번호를 초기화하지 않는다.</b> 이전 케이스의 항목이 남는다.</li>
+    <li>매 호출마다 <code>sorted(score.items())</code>를 하면 O(N log N)이라 호출이 많을 때 시간 초과가 난다.</li>
+  </ul>
+</div>
+
+<h2>복잡도</h2>
+<p>update는 O(log N). 낡은 항목은 한 번 만들어지고 한 번 버려지므로 전체로 보면 한 번 호출당 평균 O(log N)이다. K가 작으면 getTop도 O(K log N)이다.</p>

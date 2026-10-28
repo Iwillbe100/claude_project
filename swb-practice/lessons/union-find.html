@@ -1,0 +1,74 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>"A와 B를 같은 그룹으로 <b>합친다</b>"</li>
+  <li>"A와 B가 같은 그룹인가", "A가 속한 그룹의 크기는"</li>
+</ul>
+<p>합치기만 있고 떼어 내는 일이 없을 때 쓴다.</p>
+
+<h2>핵심 아이디어</h2>
+<p>그룹마다 대표(<b>루트</b>) 한 명을 정한다. 각 사람은 <code>parent</code>로 자기 윗사람을 가리키고, 계속 따라 올라가면 루트가 나온다. 같은 루트를 가지면 같은 그룹이다.</p>
+<pre class="diagram">처음:        1  2  3  4  5          parent = [_, 1, 2, 3, 4, 5]
+
+merge(1,2):  2의 루트를 1 밑으로
+             1 ← 2                 parent[2] = 1
+
+merge(3,4):  3 ← 4
+
+merge(2,3):  2의 루트=1, 3의 루트=3 → 3의 루트를 1 밑으로
+             1 ← 2
+             ↑
+             3 ← 4                 parent[3] = 1
+
+isSame(1,4): find(1)=1, find(4)=3→1 → 같다</pre>
+
+<h2>두 가지 최적화</h2>
+<ul>
+  <li><b>경로 압축</b>: <code>find</code>하면서 지나온 모든 노드를 루트에 바로 연결한다. 다음부터 빨라진다.</li>
+  <li><b>크기 기준 합치기</b>: 작은 그룹의 루트를 큰 그룹 밑에 붙인다. 트리가 높아지지 않는다.</li>
+</ul>
+<p>두 가지를 모두 쓰면 연산 하나가 사실상 O(1)이다.</p>
+
+<h2>코드</h2>
+<pre class="codeview"><code>parent = []
+size = []
+groups = 0
+
+def init(N):
+    global parent, size, groups
+    parent = list(range(N + 1))      # 사용자 번호가 1부터이므로 N+1칸
+    size = [1] * (N + 1)
+    groups = N
+
+def find(x):
+    root = x
+    while parent[root] != root:      # 루트까지 올라간다
+        root = parent[root]
+    while parent[x] != root:         # 경로 압축
+        parent[x], x = root, parent[x]
+    return root
+
+def merge(a, b):
+    global groups
+    ra, rb = find(a), find(b)
+    if ra != rb:                     # 이미 같은 그룹이면 아무것도 안 한다
+        if size[ra] &lt; size[rb]:
+            ra, rb = rb, ra
+        parent[rb] = ra
+        size[ra] += size[rb]
+        groups -= 1
+    return size[ra]
+
+def group_size(a):
+    return size[find(a)]</code></pre>
+
+<h2>자주 하는 실수</h2>
+<div class="callout warn">
+  <ul>
+    <li><b>크기는 루트에만 저장</b>한다. 그룹 크기를 물을 때는 <code>size[a]</code>가 아니라 <code>size[find(a)]</code>.</li>
+    <li>이미 같은 그룹인데 <code>groups</code>를 줄이거나 크기를 두 번 더하면 틀린다. 루트가 다를 때만 갱신한다.</li>
+    <li>재귀 <code>find</code>는 깊이가 깊으면 재귀 한도에 걸린다. 위처럼 반복문으로 쓰는 편이 안전하다.</li>
+  </ul>
+</div>
+
+<h2>복잡도</h2>
+<p>연산 하나가 거의 O(1)(정확히는 O(α(N)))이다. N이 10만, 호출이 10만 번이어도 1초 안에 끝난다.</p>

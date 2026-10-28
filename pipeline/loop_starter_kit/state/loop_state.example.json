@@ -1,0 +1,47 @@
+{
+  "_comment": "예시 스키마입니다. 값은 STEP에서 확정된 뒤에 채웁니다. 확정되지 않은 값을 실제 결정처럼 채우지 마세요.",
+  "project_status": "DESIGNING",
+  "current_step": 1,
+  "approved_steps": [],
+  "current_loop": null,
+  "loops": {
+    "A": {
+      "name": "정보량 충족",
+      "iteration": 0,
+      "limit": null,
+      "verifier": "python scripts/check_information_count.py",
+      "last_exit_code": null,
+      "status": "NOT_STARTED"
+    },
+    "B": {
+      "name": "페이지 완성",
+      "iteration": 0,
+      "limit": null,
+      "verifier": "python scripts/check_page_contract.py",
+      "last_exit_code": null,
+      "status": "NOT_STARTED"
+    },
+    "C": {
+      "name": "정성 완성도",
+      "iteration": 0,
+      "limit": 3,
+      "verifier": "python scripts/check_quality_passes.py",
+      "last_exit_code": null,
+      "status": "NOT_STARTED"
+    }
+  },
+  "current_task_id": null,
+  "total_iteration": 0,
+  "max_iterations": null,
+  "last_error_hash": null,
+  "same_error_count": 0,
+  "same_error_limit": null,
+  "failure_type": null,
+  "next_action": null,
+  "reverse_question_pending": false,
+  "final_status": null,
+  "termination_reason": null,
+  "updated_at": null,
+  "quality_pass": null,
+  "quality_focus": null
+}

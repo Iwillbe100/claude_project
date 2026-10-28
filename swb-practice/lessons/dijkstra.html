@@ -1,0 +1,72 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>도로마다 걸리는 시간(비용)이 다른 <b>최단 거리</b></li>
+  <li>비용이 모두 같으면 BFS로 충분하다. <b>음수 비용이 있으면</b> 다익스트라를 쓸 수 없다.</li>
+</ul>
+
+<h2>핵심 아이디어</h2>
+<p>출발점에서 <b>가장 가까운 도시부터 차례로 확정</b>한다. 확정된 도시에서 이웃으로 가는 거리를 계산해 더 짧으면 갱신한다. "가장 가까운 도시"를 빨리 찾기 위해 힙을 쓴다.</p>
+<pre class="diagram">도로: 0-1 (5), 1-2 (3), 0-2 (10), 2-3 (1)      출발 0
+
+시작
+  dist = [0, ∞, ∞, ∞]
+  heap = [(0,0)]
+도시 0을 꺼냄 (거리 0)  → 1은 5, 2는 10으로 갱신
+  heap = [(5,1), (10,2)]
+도시 1을 꺼냄 (거리 5)  → 2는 5+3=8로 갱신 (10보다 짧다)
+  heap = [(8,2), (10,2)]
+도시 2를 꺼냄 (거리 8)  → 3은 8+1=9로 갱신
+  heap = [(9,3), (10,2)]
+도시 3을 꺼냄 (거리 9)  → 끝
+  dist = [0, 5, 8, 9]
+(10,2)는 나중에 꺼내도 dist[2]=8보다 크므로 버린다</pre>
+
+<h2>코드</h2>
+<pre class="codeview"><code>from heapq import heappush, heappop
+
+adj = []     # adj[u] = [(v, 시간), ...]
+
+def init(N, K, s_list, e_list, t_list):
+    global adj
+    adj = [[] for _ in range(N)]
+    for i in range(K):
+        add_road(s_list[i], e_list[i], t_list[i])
+
+def add_road(s, e, t):
+    adj[s].append((e, t))       # 양방향 도로이므로 두 쪽 모두
+    adj[e].append((s, t))
+
+def shortest(s, e):
+    INF = float("inf")
+    dist = [INF] * len(adj)
+    dist[s] = 0
+    heap = [(0, s)]
+    while heap:
+        d, u = heappop(heap)
+        if u == e:                  # 도착지를 꺼낸 순간 최단 거리가 확정
+            return d
+        if d &gt; dist[u]:             # 낡은 항목은 건너뛴다
+            continue
+        for v, w in adj[u]:
+            nd = d + w
+            if nd &lt; dist[v]:
+                dist[v] = nd
+                heappush(heap, (nd, v))
+    return -1                       # 도착지에 닿지 못했다</code></pre>
+
+<h2>왜 낡은 항목을 건너뛰나</h2>
+<p>같은 도시가 힙에 여러 번 들어갈 수 있다 (더 짧은 길을 찾을 때마다). 꺼낸 거리 <code>d</code>가 이미 기록된 <code>dist[u]</code>보다 크면 더 좋은 길로 이미 처리된 도시이므로 무시한다. 이것이 힙 버전의 다익스트라가 빠른 이유이다. (<a href="#/learn/heap">힙 강의</a>의 지연 삭제와 같은 생각이다.)</p>
+
+<h2>자주 하는 실수</h2>
+<div class="callout warn">
+  <ul>
+    <li><b>한쪽 방향만 연결.</b> 양방향 도로인데 <code>adj[s]</code>에만 넣는다.</li>
+    <li><b>힙에 (도시, 거리) 순서로 넣는다.</b> 거리가 앞에 와야 거리 순으로 나온다.</li>
+    <li><b>출발 = 도착</b>이면 0. 위 코드는 첫 번째 꺼내는 항목이 도착지라서 자연스럽게 0이 된다.</li>
+    <li><b>도시 번호의 시작.</b> 0부터인지 1부터인지 확인하고 배열 크기를 맞춘다.</li>
+    <li>도로가 추가될 수 있는 문제에서 거리를 미리 전부 계산해 두면 추가될 때마다 다시 계산해야 한다. 질의마다 실행하는 편이 간단하다.</li>
+  </ul>
+</div>
+
+<h2>복잡도</h2>
+<p>한 번 실행이 O((V + E) log V)이다. V=500, E=2,000이면 한 번에 약 수만 번의 연산이고, 질의가 1,000번이어도 충분히 풀린다. 질의가 훨씬 많고 도시가 적으면 플로이드-워셜 같은 다른 방법을 고려한다.</p>

@@ -1,0 +1,52 @@
+{
+  "_comment": "LangGraph 초기 상태. Studio 입력 칸은 5칸(country / days / style / city_priority / inject)이며, 앞의 넷만 넣어도(또는 {} 로도) 나머지는 read_request 가 채운다. inject 는 평소 비운다 — 실패 재현 칸이다 (예: [\"image_dead\"]). 처방 가지 이름을 적으면 수집 직후 그 실패를 다시 일으킨다 — 이미 있는 가지가 켜지는 것을 보거나 STEP 6 에서 새 가지의 시험지 빨간불을 먼저 볼 때 쓴다. quality_* 는 루프 C(정성 완성도) 제어 칸이며 quality_pass 에는 reducer 를 붙이지 않는다 (덮어쓰기 카운터). failure_kind · failure_evidence · detour_* 는 진단 · 처방 가지 칸(킷 고정)이며 역시 reducer 가 없다. detour_limit 은 처방 한도 — 처방 가지 하나가 사람 없이 돌 수 있는 횟수이고, 처방 가지에서 합격하고 돌아온 방문은 바퀴(loop_*_iter)로 세지 않는다. 입력으로 쓰이는 것은 5칸뿐이다. 나머지 제어 칸은 read_request 가 다시 쓰므로(loop_*_limit · same_error_limit · quality_passes_required 는 03_CONTRACT.json 값, detour_limit 은 킷 고정값) 여기 값은 참고용이다. max_iterations 는 상태 칸이 없어 invoke 때 버려진다 (기록용).",
+  "country": "일본",
+  "days": 4,
+  "style": {
+    "preferred": [
+      "맛집",
+      "휴식",
+      "쇼핑"
+    ],
+    "not_preferred": [
+      "여행일정에서 많이 걸어야하는건 싫어"
+    ],
+    "detailed": [
+      "오사카-고베를 갈꺼야. 고베마라톤에 참가하면서 겸사겸사 가는거야",
+      "11/15일 대회야. 대회를 뛰어야해서 여행일정에서 많이 걸어야하는건 싫어",
+      "여행 일정은 11/13~16(3박4일)"
+    ]
+  },
+  "city_priority": [
+    "내 취향",
+    "유명도",
+    "교통"
+  ],
+  "country_intro": {},
+  "cities": [],
+  "city_failures": [],
+  "info_verdict": "UNKNOWN",
+  "info_short_slots": [],
+  "page_verdict": "UNKNOWN",
+  "page_short_slots": [],
+  "quality_short_slots": [],
+  "html_path": "",
+  "loop_a_iter": 0,
+  "loop_a_limit": 3,
+  "loop_b_iter": 0,
+  "loop_b_limit": 3,
+  "quality_pass": 0,
+  "quality_passes_required": 3,
+  "quality_verdict": "UNKNOWN",
+  "same_error_count": 0,
+  "same_error_limit": 2,
+  "last_error_hash": "",
+  "max_iterations": 10,
+  "inject": [],
+  "failure_kind": "",
+  "failure_evidence": [],
+  "detour_attempts": {},
+  "detour_limit": 2,
+  "detour_verdict": "",
+  "history": []
+}
