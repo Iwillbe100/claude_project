@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The song quiz streams iTunes previews. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="가족 게임판"
         android:name="${applicationName}"

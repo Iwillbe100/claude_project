@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +48,11 @@ class _GameScreenState extends State<GameScreen> {
         HapticFeedback.heavyImpact();
       })
       ..loadFlutterAsset('assets/www/game.html');
+    // The song quiz starts its first clip after a network lookup, outside the tap.
+    final platform = _controller.platform;
+    if (platform is AndroidWebViewController) {
+      platform.setMediaPlaybackRequiresUserGesture(false);
+    }
   }
 
   Future<void> _onBack() async {

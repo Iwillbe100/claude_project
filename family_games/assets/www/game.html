@@ -27,6 +27,7 @@ img { max-width: 100%; }
   --g-chosung: #2F6FD6;
   --g-quiz: #D2457A;
   --g-nonsense: #5E8F1E;
+  --g-song: #29B6D8;
   --on: #FFFFFF;
   --on-sun: #16313B;
   --good: #19A463;
@@ -37,13 +38,13 @@ img { max-width: 100%; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0D1C22; --surface: #16292F; --ink: #E7F0F2; --muted: #91A9B2; --line: #284149;
-    --g-finger: #F06A4D; --g-bomb: #3A5662; --g-liar: #7E62E3; --g-head: #F7B23E; --g-balance: #19A19D; --g-chosung: #4A86E8; --g-quiz: #E2638F; --g-nonsense: #7DB236;
+    --g-finger: #F06A4D; --g-bomb: #3A5662; --g-liar: #7E62E3; --g-head: #F7B23E; --g-balance: #19A19D; --g-chosung: #4A86E8; --g-quiz: #E2638F; --g-nonsense: #7DB236; --g-song: #45C6E4;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0D1C22; --surface: #16292F; --ink: #E7F0F2; --muted: #91A9B2; --line: #284149;
-  --g-finger: #F06A4D; --g-bomb: #3A5662; --g-liar: #7E62E3; --g-head: #F7B23E; --g-balance: #19A19D; --g-chosung: #4A86E8; --g-quiz: #E2638F; --g-nonsense: #7DB236;
+  --g-finger: #F06A4D; --g-bomb: #3A5662; --g-liar: #7E62E3; --g-head: #F7B23E; --g-balance: #19A19D; --g-chosung: #4A86E8; --g-quiz: #E2638F; --g-nonsense: #7DB236; --g-song: #45C6E4;
   color-scheme: dark;
 }
 html, body { height: 100%; }
@@ -188,6 +189,18 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--g-chosung);
 .opt.right { background: var(--good); border-color: var(--good); color: var(--on); }
 .opt.wrong { background: var(--bad); border-color: var(--bad); color: var(--on); }
 #score b { font-variant-numeric: tabular-nums; margin-left: 4px; }
+
+/* Song quiz */
+.eq { display: flex; gap: 8px; align-items: flex-end; height: 72px; }
+.eq i { width: 12px; height: 18%; border-radius: 6px; background: var(--accent); transition: height .3s; }
+.eq.on i { animation: eq .45s ease-in-out infinite alternate; }
+.eq.on i:nth-child(2) { animation-delay: -.15s; }
+.eq.on i:nth-child(3) { animation-delay: -.3s; }
+.eq.on i:nth-child(4) { animation-delay: -.08s; }
+.eq.on i:nth-child(5) { animation-delay: -.22s; }
+@keyframes eq { to { height: 100%; } }
+.opt small { display: block; font-family: var(--body); font-size: .85rem; opacity: .8; }
+.btn:disabled { opacity: .5; }
 
 /* Players */
 .plist { display: flex; flex-direction: column; gap: 8px; }
@@ -431,6 +444,48 @@ const NONSENSE = [
   ["진짜 새의 이름은?","참새","참(진짜) + 새"],
   ["버섯이 부끄러워하는 이유는?","벗었으니까","버섯 → 벗었어"],
 ];
+// [title, artist, iTunes trackId, era] — the clip itself is the track's 30-second iTunes preview, fetched at play time.
+const SONG_ERAS = ["옛노래·트로트","90·00년대","2010년대","요즘 노래","동요"];
+const SONGS = [
+  ["테스형!","나훈아",1552566188,"옛노래·트로트"],["단발머리","조용필",310139457,"옛노래·트로트"],["여행을 떠나요","조용필",311455760,"옛노래·트로트"],
+  ["바운스","조용필",1764114948,"옛노래·트로트"],["어머나","장윤정",1653754052,"옛노래·트로트"],["초혼","장윤정",1653756636,"옛노래·트로트"],
+  ["사랑은 늘 도망가","임영웅",1589204991,"옛노래·트로트"],["이제 나만 믿어요","임영웅",1506119624,"옛노래·트로트"],["사랑의 배터리","홍진영",1562005525,"옛노래·트로트"],
+  ["무조건","박상철",349429819,"옛노래·트로트"],["J에게","이선희",351093754,"옛노래·트로트"],["그때 그 사람","심수봉",1598839613,"옛노래·트로트"],
+  ["짝사랑","주현미",1598844491,"옛노래·트로트"],["남행열차","김수희",1804577076,"옛노래·트로트"],["광화문 연가","이문세",1455176635,"옛노래·트로트"],
+  ["서른 즈음에","김광석",1501124618,"옛노래·트로트"],["가인이어라","송가인",1804711918,"옛노래·트로트"],["니가 왜 거기서 나와","영탁",1576151976,"옛노래·트로트"],
+  ["아모르 파티","김연자",1263383902,"옛노래·트로트"],["사랑은 아무나 하나","태진아",1620461523,"옛노래·트로트"],["잃어버린 30년","설운도",422245961,"옛노래·트로트"],
+  ["봉선화 연정","현철",351105959,"옛노래·트로트"],["동백 아가씨","이미자",1602515021,"옛노래·트로트"],["홍시","나훈아",1552569420,"옛노래·트로트"],
+  ["돌아와요 부산항에","조용필",310139456,"옛노래·트로트"],["아파트","윤수일",1422592698,"옛노래·트로트"],["모래 알갱이","임영웅",1699189912,"옛노래·트로트"],
+  ["잘못된 만남","김건모",1728627771,"90·00년대"],["핑계","김건모",1728633018,"90·00년대"],["난 알아요","서태지와 아이들",1614225468,"90·00년대"],
+  ["애상","쿨",955125134,"90·00년대"],["해변의 여인","쿨",955116481,"90·00년대"],["날개 잃은 천사","룰라",1494267337,"90·00년대"],
+  ["거짓말","god",1671922071,"90·00년대"],["촛불하나","god",1671922069,"90·00년대"],["영원한 사랑","핑클",1456207541,"90·00년대"],
+  ["캔디","H.O.T.",1060455878,"90·00년대"],["I'm Your Girl","S.E.S.",1060481744,"90·00년대"],["멍","김현정",1578474691,"90·00년대"],
+  ["10 Minutes","이효리",1397154168,"90·00년대"],["거리에서","성시경",1543850904,"90·00년대"],["말달리자","크라잉넛",307671248,"90·00년대"],
+  ["Tell Me","원더걸스",1698697000,"90·00년대"],["Nobody","원더걸스",1699171680,"90·00년대"],["Gee","소녀시대",854911644,"90·00년대"],
+  ["거짓말","빅뱅",1330947216,"90·00년대"],["붉은 노을","빅뱅",1333468525,"90·00년대"],["보이지 않는 사랑","신승훈",1728633794,"90·00년대"],
+  ["아주 오래된 연인들","015B",1562123975,"90·00년대"],["DOC와 춤을","DJ DOC",1464912284,"90·00년대"],["커플","젝스키스",1397154750,"90·00년대"],
+  ["아로하","쿨",955125265,"90·00년대"],["가시","버즈",1454772762,"90·00년대"],["Timeless","SG워너비",1617997270,"90·00년대"],
+  ["주문 (MIROTIC)","동방신기",1062469154,"90·00년대"],["순정","코요태",1419892108,"90·00년대"],
+  ["소주 한 잔","임창정",1465921712,"2010년대"],["강남스타일","싸이",1445144527,"2010년대"],["좋은 날","아이유",409076748,"2010년대"],
+  ["밤편지","아이유",1229073406,"2010년대"],["벚꽃 엔딩","버스커 버스커",1570572282,"2010년대"],["TT","트와이스",1555401122,"2010년대"],
+  ["Cheer Up","트와이스",1555389973,"2010년대"],["봄날","BTS",1596529381,"2010년대"],["뚜두뚜두","블랙핑크",1551479993,"2010년대"],
+  ["봄이 좋냐??","10CM",1747833892,"2010년대"],["주저하는 연인들을 위해","잔나비",1456103133,"2010년대"],
+  ["어떻게 이별까지 사랑하겠어, 널 사랑하는 거지","악뮤",1480802550,"2010년대"],["한 페이지가 될 수 있게","DAY6",1689325541,"2010년대"],
+  ["뱅뱅뱅","빅뱅",1313176083,"2010년대"],["으르렁","엑소",854908245,"2010년대"],["빨간 맛","레드벨벳",1256504651,"2010년대"],
+  ["What is Love?","트와이스",1555390083,"2010년대"],["DNA","BTS",1596529066,"2010년대"],["Blueming","아이유",1488300930,"2010년대"],
+  ["HIP","마마무",1487928109,"2010년대"],["여행","볼빨간사춘기",1550539052,"2010년대"],["모든 날, 모든 순간","폴킴",1360245440,"2010년대"],
+  ["벌써 12시","청하",1569281536,"2010년대"],
+  ["Dynamite","BTS",1596532400,"요즘 노래"],["Butter","BTS",1627575769,"요즘 노래"],["아무노래","지코",1494673344,"요즘 노래"],
+  ["Hype Boy","뉴진스",1635469851,"요즘 노래"],["Ditto","뉴진스",1657231962,"요즘 노래"],["Super Shy","뉴진스",1692686518,"요즘 노래"],
+  ["I AM","아이브",1680047366,"요즘 노래"],["ANTIFRAGILE","르세라핌",1647830390,"요즘 노래"],["Next Level","에스파",1567326688,"요즘 노래"],
+  ["Supernova","에스파",1773694544,"요즘 노래"],["Love wins all","아이유",1726888402,"요즘 노래"],["APT.","로제 & 브루노 마스",1773452221,"요즘 노래"],
+  ["Golden","헌트릭스 (케이팝 데몬 헌터스)",1820264150,"요즘 노래"],["After LIKE","아이브",1639416903,"요즘 노래"],["Perfect Night","르세라핌",1712731159,"요즘 노래"],
+  ["OMG","뉴진스",1659513445,"요즘 노래"],["Whiplash","에스파",1772214981,"요즘 노래"],["예뻤어","DAY6",1689329128,"요즘 노래"],
+  ["Seven","정국",1709555102,"요즘 노래"],["Pink Venom","블랙핑크",1639174482,"요즘 노래"],["Magnetic","아일릿",1734500896,"요즘 노래"],
+  ["첫 만남은 계획대로 되지 않아","투어스",1723932648,"요즘 노래"],
+  ["상어 가족","핑크퐁",1361846377,"동요"],["곰 세 마리","핑크퐁",1699840359,"동요"],["나비야","핑크퐁",1501937709,"동요"],
+  ["그대로 멈춰라!","핑크퐁",1731200989,"동요"],["머리 어깨 무릎 발","핑크퐁",1699840622,"동요"],
+];
 const NEXT_TINTS = ["--g-finger","--g-liar","--g-head","--g-balance","--g-chosung","--good","--bad","--g-bomb"];
 
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -507,6 +562,7 @@ const GAMES = [
   { id: "chosung", mark: "ㄱㄴ", name: "초성 퀴즈", desc: "초성만 보고 먼저 외치기", tint: "--g-chosung", go: () => chosungSetup() },
   { id: "quiz", mark: "O X", name: "상식 퀴즈", desc: "보기 4개 중에 정답 고르기", tint: "--g-quiz", go: () => quiz() },
   { id: "nonsense", mark: "ㅋㅋ", name: "넌센스 퀴즈", desc: "말장난 문제, 먼저 외치면 1점", tint: "--g-nonsense", go: () => nonsense() },
+  { id: "song", mark: "♪", name: "노래 맞히기", desc: "노래 한 소절 듣고 제목 먼저 외치기 · 인터넷 필요", tint: "--g-song", sun: true, wide: true, go: () => songSetup() },
 ];
 function home() {
   render(`
@@ -864,6 +920,125 @@ function chosungPlay() {
     const reveal = () => { $("#ans").style.visibility = "visible"; };
     later(() => { beep(330, .3, "triangle", .15); reveal(); }, 15000);
     $("#show").onclick = reveal;
+    $("#next").onclick = () => { i++; draw(); };
+  };
+  draw();
+}
+
+/* 9. Song quiz */
+let songEra = "섞어서", songLen = 3;
+const previews = {}; // trackId -> previewUrl
+let previewLoad = null;
+// One JSONP lookup for every song; preview URLs can change, so they aren't hard-coded.
+function loadPreviews() {
+  if (previewLoad) return previewLoad;
+  previewLoad = new Promise((resolve, reject) => {
+    const cb = "itunes" + Date.now(), s = document.createElement("script");
+    const done = ok => {
+      clearTimeout(t); window[cb] = () => {}; s.remove();
+      if (ok && Object.keys(previews).length) resolve(); else { previewLoad = null; reject(); }
+    };
+    const t = setTimeout(() => done(false), 12000);
+    window[cb] = d => { (d.results || []).forEach(r => { if (r.previewUrl) previews[r.trackId] = r.previewUrl; }); done(true); };
+    s.onerror = () => done(false);
+    s.src = `https://itunes.apple.com/lookup?id=${SONGS.map(x => x[2]).join(",")}&callback=${cb}`;
+    document.head.appendChild(s);
+  });
+  return previewLoad;
+}
+function songSetup() {
+  render(`${topBar("노래 맞히기")}
+    <p class="rule">노래 한 소절을 짧게 들려줘요. 제목을 먼저 외친 사람이 1점! 어려우면 조금 더 듣거나 보기 4개를 펼쳐 보세요. 인터넷이 연결돼 있어야 해요.</p>
+    <p class="label">어떤 노래</p>
+    ${chipGroup("eras", ["섞어서", ...SONG_ERAS], songEra, true)}
+    <p class="label">처음 들려줄 길이</p>
+    ${chipGroup("lens", ["1초", "3초", "5초", "10초"], songLen + "초", true)}
+    <p class="rule" id="net" aria-live="polite"></p>
+    <button class="btn sun" id="go">시작</button>`, "--g-song");
+  bindChips("eras", v => songEra = v);
+  bindChips("lens", v => songLen = parseInt(v, 10));
+  const go = $("#go");
+  go.onclick = () => {
+    go.disabled = true; $("#net").textContent = "노래 목록 불러오는 중…";
+    loadPreviews().then(() => { if (go.isConnected) songPlay(); }, () => {
+      if (!go.isConnected) return;
+      go.disabled = false; $("#net").textContent = "노래를 못 불러왔어요. 인터넷 연결을 확인하고 다시 눌러 주세요.";
+    });
+  };
+}
+function songPlay() {
+  const pool = (songEra === "섞어서" ? SONGS : SONGS.filter(s => s[3] === songEra)).filter(s => previews[s[2]]);
+  const qs = shuffle(pool);
+  if (!qs.length) return songSetup();
+  const score = Object.fromEntries(players.map(p => [p, 0]));
+  const player = new Audio();
+  player.preload = "auto";
+  let i = 0, endAt = 0, stopT = null, pending = null;
+  const stop = () => {
+    clearTimeout(stopT); player.pause();
+    if (pending) { player.removeEventListener("loadedmetadata", pending); pending = null; }
+  };
+  const eq = on => { const e = $("#eq"); if (e) e.classList.toggle("on", on); };
+  player.addEventListener("playing", () => {
+    eq(true); clearTimeout(stopT);
+    if (isFinite(endAt)) stopT = setTimeout(stop, Math.max(0, (endAt - player.currentTime) * 1000));
+  });
+  player.addEventListener("waiting", () => clearTimeout(stopT));
+  player.addEventListener("pause", () => eq(false));
+  player.addEventListener("ended", () => eq(false));
+  // Plays [from, from + len) once the clip's length is known; len = Infinity runs to the end of the preview.
+  const playFrom = (getFrom, len) => {
+    stop();
+    pending = () => {
+      pending = null;
+      const from = getFrom(); endAt = from + len;
+      player.currentTime = from; player.play().catch(() => eq(false));
+    };
+    if (player.readyState >= 1) pending(); else player.addEventListener("loadedmetadata", pending);
+  };
+  const board = () => players.map(p => `<button class="chip" data-p="${esc(p)}">${esc(p)} <b>${score[p]}</b></button>`).join("");
+  const draw = () => {
+    const [title, artist, id, era] = qs[i % qs.length];
+    let len = songLen, from = null;
+    // Wrong options come from the same era so the choices stay plausible.
+    const near = shuffle(SONGS.filter(s => s[3] === era && s[2] !== id && s[0] !== title));
+    const far = shuffle(SONGS.filter(s => s[3] !== era && s[0] !== title));
+    const opts = shuffle([qs[i % qs.length], ...[...near, ...far].slice(0, 3)]);
+    render(`${topBar("노래 맞히기")}
+      <div class="card stage"><p class="label">${(i % qs.length) + 1} / ${qs.length} · ${esc(era)}</p>
+        <div class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <div id="ans" style="visibility:hidden"><p class="mid">${esc(title)}</p><p class="rule">${esc(artist)}</p></div></div>
+      <div class="row"><button class="btn ghost" id="replay">다시 듣기</button><button class="btn ghost" id="more">+3초 더</button></div>
+      <button class="linkbtn" id="showOpts">어려우면 보기 4개 펼치기</button>
+      <div class="opts" id="opts" hidden>${opts.map((o, k) => `<button class="opt" data-k="${k}">${esc(o[0])}<small>${esc(o[1])}</small></button>`).join("")}</div>
+      <p class="label">먼저 맞힌 사람 이름을 눌러 1점</p>
+      <div class="chips" id="score">${board()}</div>
+      <div class="row"><button class="btn ghost" id="show">정답 보기</button><button class="btn sun" id="next">다음 노래</button></div>`, "--g-song");
+    cleanup = stop;
+    player.src = previews[id];
+    // Random start inside the ~30 s preview, leaving room for "+3초 더".
+    const start = () => from ??= Math.random() * Math.max(0, (player.duration || 30) - 15);
+    const clip = () => playFrom(start, len);
+    clip();
+    $("#replay").onclick = clip;
+    $("#more").onclick = () => { len += 3; clip(); };
+    $("#showOpts").onclick = () => { $("#opts").hidden = false; $("#showOpts").hidden = true; };
+    let done = false;
+    $$(".opt").forEach(b => b.onclick = () => {
+      if (done) return; done = true;
+      const ok = opts[+b.dataset.k][2] === id;
+      $$(".opt").forEach(x => { if (opts[+x.dataset.k][2] === id) x.classList.add("right"); });
+      if (!ok) b.classList.add("wrong");
+      ok ? beep(880, .15, "triangle", .2) : beep(200, .2, "sawtooth", .12);
+    });
+    $("#show").onclick = () => {
+      $("#ans").style.visibility = "visible";
+      playFrom(start, Infinity);
+    };
+    const bindScore = () => $$("#score .chip").forEach(c => c.onclick = () => {
+      score[c.dataset.p]++; beep(700, .06, "sine"); $("#score").innerHTML = board(); bindScore();
+    });
+    bindScore();
     $("#next").onclick = () => { i++; draw(); };
   };
   draw();
