@@ -1,13 +1,25 @@
 package com.couple.couple_ledger
 
+import android.content.ComponentName
 import android.content.Intent
 import android.provider.Settings
+import android.service.notification.NotificationListenerService
 import androidx.core.app.NotificationManagerCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    override fun onResume() {
+        super.onResume()
+        // 앱 업데이트 등으로 알림 리스너 바인딩이 끊겨도 앱을 열면 다시 연결한다
+        if (NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)) {
+            NotificationListenerService.requestRebind(
+                ComponentName(this, CardNotificationService::class.java)
+            )
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "couple_ledger/capture")
