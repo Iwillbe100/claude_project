@@ -1,0 +1,45 @@
+<h2>문제 설명</h2>
+<p>밭이 한 줄로 N칸 있고, 0번부터 N-1번까지 번호가 붙어 있다. 칸마다 작물이 한 그루씩 자라고 있으며, 처음 높이가 주어진다.</p>
+<p>농부는 다음 세 가지 일을 한다.</p>
+<ul>
+  <li>연속한 구간에 물을 주면 그 구간의 작물이 모두 같은 만큼 자란다.</li>
+  <li>작물 하나를 수확하면 그 칸의 높이는 0이 된다 (그 자리에서 다시 자란다).</li>
+  <li>연속한 구간에서 가장 큰 작물의 높이를 확인한다.</li>
+</ul>
+
+<h2>구현할 함수</h2>
+<pre><code>def init(N: int, mHeight: list) -&gt; None</code></pre>
+<p>각 테스트 케이스의 처음에 호출된다. <code>mHeight[i]</code>는 i번 칸의 처음 높이이다.</p>
+
+<pre><code>def grow(mL: int, mR: int, mV: int) -&gt; None</code></pre>
+<p><code>mL</code>번부터 <code>mR</code>번까지(양 끝 포함) 모든 칸의 높이에 <code>mV</code>를 더한다.</p>
+
+<pre><code>def cut(mIdx: int) -&gt; int</code></pre>
+<p><code>mIdx</code>번 칸의 현재 높이를 반환하고, 그 칸의 높이를 0으로 만든다.</p>
+
+<pre><code>def tallest(mL: int, mR: int) -&gt; int</code></pre>
+<p><code>mL</code>번부터 <code>mR</code>번까지(양 끝 포함) 칸 중 가장 큰 높이를 반환한다.</p>
+
+<h2>제약 사항</h2>
+<ul>
+  <li>1 ≤ N ≤ 100,000</li>
+  <li>0 ≤ mHeight[i] ≤ 1,000,000</li>
+  <li>0 ≤ mL ≤ mR ≤ N-1, 0 ≤ mIdx ≤ N-1</li>
+  <li>1 ≤ mV ≤ 1,000</li>
+  <li>각 테스트 케이스에서 모든 함수를 합쳐 최대 20,000번 호출한다 (init 제외).</li>
+</ul>
+
+<h2>예시</h2>
+<p>N = 6, 처음 높이 [3, 1, 4, 1, 5, 9]</p>
+<table>
+  <tr><th>호출</th><th>반환</th><th>높이</th></tr>
+  <tr><td>tallest(0, 3)</td><td>4</td><td>[3, 1, 4, 1, 5, 9]</td></tr>
+  <tr><td>grow(0, 3, 2)</td><td></td><td>[5, 3, 6, 3, 5, 9]</td></tr>
+  <tr><td>tallest(0, 4)</td><td>6</td><td></td></tr>
+  <tr><td>cut(2)</td><td>6</td><td>[5, 3, 0, 3, 5, 9]</td></tr>
+  <tr><td>grow(1, 5, 1)</td><td></td><td>[5, 4, 1, 4, 6, 10]</td></tr>
+  <tr><td>tallest(1, 3)</td><td>4</td><td></td></tr>
+  <tr><td>cut(5)</td><td>10</td><td>[5, 4, 1, 4, 6, 0]</td></tr>
+  <tr><td>tallest(3, 5)</td><td>6</td><td></td></tr>
+</table>
+<p class="hint">힌트: grow를 칸 하나씩 처리하면 한 번에 최대 10만 번 더해야 한다. 칸을 몇십~몇백 개씩 묶어서 "묶음 전체에 더하기"를 한 번에 처리해 보자.</p>

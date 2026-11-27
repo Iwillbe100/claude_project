@@ -1,0 +1,55 @@
+<h2>문제 설명</h2>
+<p>택시 호출 서비스를 만든다. 도시는 N × N 격자이고, 좌표 (x, y)는 0 ≤ x, y ≤ N-1인 정수이다. 두 지점 사이의 거리는 <b>맨해튼 거리</b> |x1 - x2| + |y1 - y2|이다.</p>
+<p>손님이 택시를 부르면, 손님 위치에서 <b>거리 L 이내</b>에 있는 대기 중인 택시 중 가장 가까운 택시를 배정한다. 배정된 택시는 운행을 시작하므로 대기 목록에서 빠진다. 운행을 마친 택시는 나중에 다시 대기 목록에 들어올 수 있다.</p>
+
+<h2>구현할 함수</h2>
+<pre><code>def init(N: int, L: int) -&gt; None</code></pre>
+<p>각 테스트 케이스의 처음에 호출된다. 도시의 크기는 N × N, 배정 거리 제한은 L이다. 대기 중인 택시는 없다.</p>
+
+<pre><code>def addTaxi(mId: int, mX: int, mY: int) -&gt; None</code></pre>
+<p>택시 <code>mId</code>가 (mX, mY)에서 대기를 시작한다. 처음 등장하는 택시이거나, 앞서 <code>callTaxi</code>로 배정되어 운행을 마친 택시이다. <b>이미 대기 중인 택시로는 호출되지 않는다.</b></p>
+
+<pre><code>def moveTaxi(mId: int, mX: int, mY: int) -&gt; None</code></pre>
+<p>대기 중인 택시 <code>mId</code>가 (mX, mY)로 이동한다. <code>mId</code>는 항상 대기 중인 택시이다.</p>
+
+<pre><code>def callTaxi(mX: int, mY: int) -&gt; int</code></pre>
+<p>(mX, mY)에 있는 손님이 택시를 부른다. 대기 중인 택시 중 손님과의 거리가 <b>L 이하</b>인 택시들 가운데</p>
+<ol>
+  <li>거리가 가장 가까운 택시,</li>
+  <li>거리가 같다면 ID가 가장 작은 택시</li>
+</ol>
+<p>를 배정하고 그 ID를 반환한다. 배정된 택시는 대기 목록에서 빠진다. 조건을 만족하는 택시가 없으면 <b>-1</b>을 반환하고 아무것도 바뀌지 않는다.</p>
+
+<pre><code>def countTaxi(mX: int, mY: int) -&gt; int</code></pre>
+<p>(mX, mY)에서 거리가 L 이하인 대기 중인 택시의 수를 반환한다.</p>
+
+<h2>제약 사항</h2>
+<ul>
+  <li>10 ≤ N ≤ 1,000,000</li>
+  <li>1 ≤ L ≤ N</li>
+  <li>1 ≤ mId ≤ 1,000,000,000</li>
+  <li>대기 중인 택시는 어느 순간에도 최대 20,000대이다.</li>
+  <li>각 테스트 케이스에서 모든 함수를 합쳐 최대 30,000번 호출한다 (init 제외).</li>
+  <li>한 변이 L인 정사각형 안에 대기 중인 택시가 50대를 넘는 경우는 거의 없다 (택시는 도시 전체에 퍼져 있다).</li>
+</ul>
+
+<h2>예시</h2>
+<p>N = 100, L = 10</p>
+<table>
+  <tr><th>호출</th><th>반환</th><th>설명</th></tr>
+  <tr><td>addTaxi(7, 10, 10)</td><td></td><td></td></tr>
+  <tr><td>addTaxi(3, 15, 12)</td><td></td><td></td></tr>
+  <tr><td>addTaxi(9, 30, 30)</td><td></td><td></td></tr>
+  <tr><td>countTaxi(12, 12)</td><td>2</td><td>7번 거리 4, 3번 거리 3, 9번 거리 36</td></tr>
+  <tr><td>callTaxi(12, 12)</td><td>3</td><td>가장 가까운 3번 배정 (대기 목록에서 빠짐)</td></tr>
+  <tr><td>addTaxi(5, 14, 10)</td><td></td><td></td></tr>
+  <tr><td>callTaxi(12, 10)</td><td>5</td><td>7번과 5번 모두 거리 2 → ID가 작은 5번</td></tr>
+  <tr><td>callTaxi(24, 24)</td><td>-1</td><td>9번은 거리 12, 7번은 거리 28. 모두 L보다 멀다</td></tr>
+  <tr><td>moveTaxi(9, 26, 28)</td><td></td><td></td></tr>
+  <tr><td>callTaxi(24, 24)</td><td>9</td><td>9번 거리 6</td></tr>
+  <tr><td>addTaxi(3, 50, 50)</td><td></td><td>운행을 마친 3번이 다시 대기</td></tr>
+  <tr><td>countTaxi(45, 48)</td><td>1</td><td>3번 거리 7</td></tr>
+  <tr><td>callTaxi(10, 20)</td><td>7</td><td>7번 거리 정확히 10 = L (배정 가능)</td></tr>
+  <tr><td>countTaxi(10, 20)</td><td>0</td><td></td></tr>
+</table>
+<p class="hint">힌트: 매번 모든 택시와 거리를 재면 느리다. 거리 L 이내라면 x, y 좌표 차이가 각각 L 이하라는 점을 이용해 근처의 택시만 확인해 보자.</p>

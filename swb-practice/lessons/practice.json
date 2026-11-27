@@ -48,12 +48,27 @@
       { "site": "백준", "title": "10868 최솟값", "url": "https://www.acmicpc.net/problem/10868", "note": "최솟값 트리만 만들면 된다. 입문용" },
       { "site": "백준", "title": "세그먼트 트리 설명 (알고리즘 책)", "url": "https://book.acmicpc.net/ds/segment-tree", "note": "백준에서 제공하는 설명. 이 강의와 함께 읽어 보자" }
     ],
+    "linked-list": [
+      { "site": "프로그래머스", "title": "표 편집", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/81303", "note": "행 삭제·복구를 연결 리스트로 처리한다. 강의의 '삭제 후 복구' 부분을 그대로 쓴다" }
+    ],
     "tree": [
       { "site": "프로그래머스", "title": "길 찾기 게임", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42892", "note": "좌표로 이진 트리를 만들고 순회한다. 재귀 깊이에 주의" },
       { "site": "프로그래머스", "title": "표 편집", "url": "https://school.programmers.co.kr/learn/courses/30/lessons/81303", "note": "삭제·복구를 연결 리스트로 처리하는 자료구조 설계 문제" }
+    ],
+    "prefix-sum": [
+      { "site": "백준", "title": "11659 구간 합 구하기 4", "url": "https://www.acmicpc.net/problem/11659", "note": "1차원 누적합의 기본" },
+      { "site": "백준", "title": "11660 구간 합 구하기 5", "url": "https://www.acmicpc.net/problem/11660", "note": "2차원 누적합. 포함-배제를 직접 짜 보자" },
+      { "site": "백준", "title": "2003 수들의 합 2", "url": "https://www.acmicpc.net/problem/2003", "note": "합이 M인 연속 구간의 개수. 투 포인터로도, 누적합 + dict로도 풀어 보자" },
+      { "site": "백준", "title": "1806 부분합", "url": "https://www.acmicpc.net/problem/1806", "note": "합이 S 이상인 가장 짧은 연속 구간. 투 포인터의 대표 문제" }
+    ],
+    "fenwick": [
+      { "site": "백준", "title": "2042 구간 합 구하기", "url": "https://www.acmicpc.net/problem/2042", "note": "한 칸 바꾸기 + 구간 합. '바꾸기는 차이만큼 더하기'를 연습한다" },
+      { "site": "백준", "title": "2243 사탕상자", "url": "https://www.acmicpc.net/problem/2243", "note": "맛 순서로 k번째 사탕 꺼내기. 이 사이트의 도서관 서가 find와 같은 k번째 찾기" }
     ]
   },
   "note": {
-    "segment-tree": "프로그래머스에서는 세그먼트 트리가 꼭 필요한 문제를 찾지 못해서, 같은 유형의 대표 문제가 있는 백준을 대신 넣었습니다."
+    "segment-tree": "프로그래머스에서는 세그먼트 트리가 꼭 필요한 문제를 찾지 못해서, 같은 유형의 대표 문제가 있는 백준을 대신 넣었습니다.",
+    "prefix-sum": "누적합과 투 포인터는 B형에서 단독으로 나오기보다 다른 자료구조와 함께 쓰여서, 기본기를 다지는 백준 문제를 넣었습니다.",
+    "fenwick": "펜윅 트리가 꼭 필요한 문제는 백준에 대표 문제가 많아서 백준을 넣었습니다."
   }
 }

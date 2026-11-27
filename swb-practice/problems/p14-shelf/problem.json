@@ -1,0 +1,13 @@
+{
+  "title": "도서관 서가",
+  "category": "펜윅 트리",
+  "difficulty": 2,
+  "timeLimit": 3,
+  "order": 14,
+  "lesson": "fenwick",
+  "hints": [
+    "count(mL, mR)를 칸을 하나씩 더해서 구하면 한 번에 최대 10만 칸입니다. 호출이 5만 번이면 시간 초과입니다. 값이 계속 바뀌므로 누적합을 한 번 만들어 두는 방법도 쓸 수 없습니다.",
+    "칸마다 책 수를 펜윅 트리(BIT)에 담으세요. put/take는 그 칸에 +mCnt, -뺀 권수를 add하고, count는 prefix(mR+1) - prefix(mL)입니다. 펜윅 트리는 1번부터 쓰므로 칸 번호에 1을 더해 넘깁니다. take에서 실제로 뺄 수 있는 권수를 알려면 칸별 책 수 배열을 따로 들고 있어야 합니다.",
+    "find(mK)는 prefix(i) >= mK인 가장 작은 i를 찾는 문제입니다. prefix를 이분 탐색하면 O(log² N), 펜윅 트리를 큰 단계(2의 거듭제곱)부터 내려가며 tree[pos+step] < k이면 pos += step, k -= tree[pos]로 건너뛰면 O(log N)입니다. 답은 pos(0부터 센 칸 번호)입니다. 전체 책 수가 mK보다 적으면 -1입니다."
+  ]
+}

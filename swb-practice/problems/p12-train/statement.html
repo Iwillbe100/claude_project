@@ -1,0 +1,48 @@
+<h2>문제 설명</h2>
+<p>기차역에서 열차를 편성한다. 열차 맨 앞에는 항상 <b>기관차(번호 0)</b>가 있고, 그 뒤에 객차가 한 줄로 이어진다. 객차마다 서로 다른 번호가 붙어 있다.</p>
+<p>객차를 원하는 위치에 붙이고, 떼어 내고, 다른 위치로 옮기는 작업을 처리하는 프로그램을 작성하라. 위치는 항상 "어떤 차량의 <b>바로 뒤</b>"로 정한다.</p>
+
+<h2>구현할 함수</h2>
+<pre><code>def init() -&gt; None</code></pre>
+<p>각 테스트 케이스의 처음에 호출된다. 열차에는 기관차만 있다.</p>
+
+<pre><code>def addCar(mId: int, mPrevId: int) -&gt; int</code></pre>
+<p>새 객차 <code>mId</code>를 차량 <code>mPrevId</code>의 <b>바로 뒤</b>에 붙인다. 원래 <code>mPrevId</code> 뒤에 있던 객차들은 <code>mId</code> 뒤로 밀린다. <code>mPrevId</code>가 0이면 기관차 바로 뒤이다.<br>
+붙인 뒤 열차의 <b>객차 수</b>(기관차 제외)를 반환한다.</p>
+
+<pre><code>def removeCar(mId: int) -&gt; int</code></pre>
+<p>객차 <code>mId</code>를 떼어 낸다. 앞뒤 객차는 서로 이어진다.<br>
+떼어 내기 전에 <code>mId</code>의 바로 뒤에 있던 객차 번호를 반환한다. 맨 뒤 객차였으면 <b>-1</b>을 반환한다.</p>
+
+<pre><code>def moveCar(mId: int, mPrevId: int) -&gt; int</code></pre>
+<p>객차 <code>mId</code>를 떼어서 차량 <code>mPrevId</code>의 바로 뒤에 붙인다.<br>
+옮긴 뒤 <code>mId</code>의 바로 뒤에 있는 객차 번호를 반환한다. 맨 뒤이면 <b>-1</b>을 반환한다.</p>
+
+<pre><code>def getCars(mId: int, mCnt: int, mResult: list) -&gt; int</code></pre>
+<p>객차 <code>mId</code>부터 뒤쪽으로 차례대로 최대 <code>mCnt</code>대의 번호를 <code>mResult[0]</code>부터 채운다 (<code>mId</code> 자신이 <code>mResult[0]</code>). <code>mResult</code>는 길이가 <code>mCnt</code>인 리스트이다.<br>
+채운 개수를 반환한다.</p>
+
+<h2>제약 사항</h2>
+<ul>
+  <li>1 ≤ mId ≤ 1,000,000,000. 객차 번호는 테스트 케이스 안에서 다시 쓰이지 않는다 (떼어 낸 번호도 다시 나오지 않는다).</li>
+  <li><code>addCar</code>의 <code>mId</code>는 새 번호이고, <code>mPrevId</code>는 0이거나 열차에 있는 객차이다.</li>
+  <li><code>removeCar</code>, <code>getCars</code>의 <code>mId</code>는 열차에 있는 객차이다.</li>
+  <li><code>moveCar</code>의 <code>mId</code>는 열차에 있는 객차, <code>mPrevId</code>는 0이거나 열차에 있는 객차이고, <code>mId ≠ mPrevId</code>이다.</li>
+  <li>1 ≤ mCnt ≤ 10</li>
+  <li>각 테스트 케이스에서 모든 함수를 합쳐 최대 100,000번 호출한다.</li>
+</ul>
+
+<h2>예시</h2>
+<table>
+  <tr><th>호출</th><th>반환</th><th>열차 (0은 기관차)</th></tr>
+  <tr><td>addCar(5, 0)</td><td>1</td><td>0 5</td></tr>
+  <tr><td>addCar(8, 5)</td><td>2</td><td>0 5 8</td></tr>
+  <tr><td>addCar(3, 0)</td><td>3</td><td>0 3 5 8</td></tr>
+  <tr><td>addCar(9, 5)</td><td>4</td><td>0 3 5 9 8</td></tr>
+  <tr><td>getCars(5, 10, r)</td><td>3</td><td>r = [5, 9, 8]</td></tr>
+  <tr><td>moveCar(3, 8)</td><td>-1</td><td>0 5 9 8 3</td></tr>
+  <tr><td>removeCar(9)</td><td>8</td><td>0 5 8 3</td></tr>
+  <tr><td>moveCar(8, 0)</td><td>5</td><td>0 8 5 3</td></tr>
+  <tr><td>getCars(8, 2, r)</td><td>2</td><td>r = [8, 5]</td></tr>
+</table>
+<p class="hint">힌트: 파이썬 리스트의 <code>index()</code>, <code>insert()</code>, <code>pop(i)</code>는 모두 O(N)이다. 순서를 리스트로 들고 있지 말고, 객차마다 "앞"과 "뒤"만 기억해 보자.</p>

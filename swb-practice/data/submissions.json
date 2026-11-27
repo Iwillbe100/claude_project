@@ -1,0 +1,62 @@
+[
+ {
+  "id": 1,
+  "problemId": "p10-robot",
+  "title": "물류 로봇",
+  "at": "2026-11-23T14:47:36.146Z",
+  "verdict": "AC",
+  "score": 100,
+  "timeMs": 160,
+  "code": "\nDR = (-1, 0, 1, 0)\nDC = (0, 1, 0, -1)\n\ndef init(N: int, mMap: list) -> None:\n    global n, wall, robots, occ\n    n = N\n    wall = mMap\n    robots = {}\n    occ = [[0]*N for _ in range(N)]         \n\ndef addRobot(mId: int, mR: int, mC: int, mDir: int) -> int:\n    if mId in robots or wall[mR][mC] == 1 or occ[mR][mC] != 0:\n        return 0\n    occ[mR][mC] = mId\n    robots[mId] = [mR, mC, mDir]\n    return 1\n\n\ndef removeRobot(mId: int) -> int:\n    if mId in robots:\n        r, c, d = robots[mId]\n        occ[r][c] = 0\n        del robots[mId]\n        return 1\n    return 0\n\n\ndef rotate(mId: int, mK: int) -> int:\n    r, c, d = robots[mId]\n    cd = (d+mK)%4\n    robots[mId][2] = cd\n    return cd\n\n\ndef move(mId: int, mSteps: int) -> int:\n    mc = 0\n    r, c, d = robots[mId]\n    \n    for _ in range(mSteps):\n        r, c, d = robots[mId]\n        nr = r + DR[d]\n        nc = c + DC[d]\n        \n        if nr < 0 or nr >= len(wall[0]) or nc < 0  or nc >= n:# 격자밖 검색\n            return mc\n        elif wall[nr][nc] == 1:\n            return mc\n        elif occ[nr][nc]:\n            return mc\n        else:\n            robots[mId][0] = nr\n            robots[mId][1] = nc\n            occ[r][c] = 0\n            occ[nr][nc] = mId\n            mc += 1\n            \n\n    return mc\n\n\ndef whoAt(mR: int, mC: int) -> int:\n    return occ[mR][mC] \n"
+ },
+ {
+  "id": 2,
+  "problemId": "p10-robot",
+  "title": "물류 로봇",
+  "at": "2026-11-23T14:49:01.033Z",
+  "verdict": "AC",
+  "score": 100,
+  "timeMs": 169,
+  "code": "\nDR = (-1, 0, 1, 0)\nDC = (0, 1, 0, -1)\n\ndef init(N: int, mMap: list) -> None:\n    global n, wall, robots, occ\n    n = N\n    wall = mMap\n    robots = {}\n    occ = [[0]*N for _ in range(N)]         \n\ndef addRobot(mId: int, mR: int, mC: int, mDir: int) -> int:\n    if mId in robots or wall[mR][mC] == 1 or occ[mR][mC] != 0:\n        return 0\n    occ[mR][mC] = mId\n    robots[mId] = [mR, mC, mDir]\n    return 1\n\n\ndef removeRobot(mId: int) -> int:\n    if mId in robots:\n        r, c, d = robots[mId]\n        occ[r][c] = 0\n        del robots[mId]\n        return 1\n    return 0\n\n\ndef rotate(mId: int, mK: int) -> int:\n    r, c, d = robots[mId]\n    cd = (d+mK)%4\n    robots[mId][2] = cd\n    return cd\n\n\ndef move(mId: int, mSteps: int) -> int:\n    mc = 0\n    r, c, d = robots[mId]\n    \n    for _ in range(mSteps):\n        r, c, d = robots[mId]\n        nr = r + DR[d]\n        nc = c + DC[d]\n        \n        if nr < 0 or nr >= len(wall[0]) or nc < 0  or nc >= n:# 격자밖 검색\n            return mc\n        elif wall[nr][nc] == 1:\n            return mc\n        elif occ[nr][nc]:\n            return mc\n        else:\n            robots[mId][0] = nr\n            robots[mId][1] = nc\n            occ[r][c] = 0\n            occ[nr][nc] = mId\n            mc += 1\n    return mc\n\n\ndef whoAt(mR: int, mC: int) -> int:\n    return occ[mR][mC] \n"
+ },
+ {
+  "id": 3,
+  "problemId": "p5-union",
+  "title": "친구 네트워크",
+  "at": "2026-11-27T06:46:43.741Z",
+  "verdict": "RE",
+  "score": 0,
+  "timeMs": 45,
+  "code": "\n\ndef init(N: int) -> None:\n    global parent, size, groups\n    parent = list(range(N+1))\n    size = [1] * (N+1)\n    groups = N\n\ndef find(mA):\n    while parent[mA] != mA             # 자기자신이 부모일때까지 올라가기\n        mA = parent[mA]\n    return mA\n    \ndef merge(mA: int, mB: int) -> int:\n    global groups\n    ra = find(mA)\n    rb = find(mB)\n    if ra == rb:\n        return size[ra]\n    if size[ra] < size[rb]:\n        ra, rb = rb, ra\n    parent[rb] = ra\n    size[ra] += size[rb]\n    groups -= 1\n    return size[ra]\n\ndef isSame(mA: int, mB: int) -> int:\n    return 1 if find(mA) == find(mB) else 0\n\ndef groupSize(mA: int) -> int:\n    return size[find(mA)]\n\ndef countGroups() -> int:\n    return groups\n"
+ },
+ {
+  "id": 4,
+  "problemId": "p5-union",
+  "title": "친구 네트워크",
+  "at": "2026-11-27T06:46:52.035Z",
+  "verdict": "AC",
+  "score": 100,
+  "timeMs": 443,
+  "code": "\n\ndef init(N: int) -> None:\n    global parent, size, groups\n    parent = list(range(N+1))\n    size = [1] * (N+1)\n    groups = N\n\ndef find(mA):\n    while parent[mA] != mA:             # 자기자신이 부모일때까지 올라가기\n        mA = parent[mA]\n    return mA\n    \ndef merge(mA: int, mB: int) -> int:\n    global groups\n    ra = find(mA)\n    rb = find(mB)\n    if ra == rb:\n        return size[ra]\n    if size[ra] < size[rb]:\n        ra, rb = rb, ra\n    parent[rb] = ra\n    size[ra] += size[rb]\n    groups -= 1\n    return size[ra]\n\ndef isSame(mA: int, mB: int) -> int:\n    return 1 if find(mA) == find(mB) else 0\n\ndef groupSize(mA: int) -> int:\n    return size[find(mA)]\n\ndef countGroups() -> int:\n    return groups\n"
+ },
+ {
+  "id": 5,
+  "problemId": "p5-union",
+  "title": "친구 네트워크",
+  "at": "2026-11-27T08:50:12.670Z",
+  "verdict": "RE",
+  "score": 0,
+  "timeMs": 37,
+  "code": "def init(N):\n    global parent, size, groups\n    parent = list(range(N+1))\n    size = [1] * (N+1)\n    groups = N\n\ndef find(x):\n    while parent[x] != x:\n        x = parent[x]\n    return x\n\ndef merge(mA, mB):\n    global groups\n    ra = find(mA)\n    rb = find(mB)\n\n    if ra == rb:\n        return size[ra]\n    if size[ra] < size[rb]:\n        ra, rb = rb, ra\n    \n\n    parent[rb] = ra\n    size[ra] += size[rb]\n    groups -=1\n    return size[ra]\n\ndef isSame(mA, mB):\n    return 1 if find(mA) == find(mB) else 0\n\ndef groupSzie(mA):\n    return size[find(mA)]\n\ndef countGroups():\n    return groups\n\n\n\n\n"
+ },
+ {
+  "id": 6,
+  "problemId": "p5-union",
+  "title": "친구 네트워크",
+  "at": "2026-11-27T08:50:19.041Z",
+  "verdict": "AC",
+  "score": 100,
+  "timeMs": 469,
+  "code": "def init(N):\n    global parent, size, groups\n    parent = list(range(N+1))\n    size = [1] * (N+1)\n    groups = N\n\ndef find(x):\n    while parent[x] != x:\n        x = parent[x]\n    return x\n\ndef merge(mA, mB):\n    global groups\n    ra = find(mA)\n    rb = find(mB)\n\n    if ra == rb:\n        return size[ra]\n    if size[ra] < size[rb]:\n        ra, rb = rb, ra\n    \n\n    parent[rb] = ra\n    size[ra] += size[rb]\n    groups -=1\n    return size[ra]\n\ndef isSame(mA, mB):\n    return 1 if find(mA) == find(mB) else 0\n\ndef groupSize(mA):\n    return size[find(mA)]\n\ndef countGroups():\n    return groups\n\n\n\n\n"
+ }
+]

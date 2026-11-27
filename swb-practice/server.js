@@ -28,6 +28,8 @@ const LESSON_DIR = path.join(ROOT, 'lessons');
 const lessons = JSON.parse(fs.readFileSync(path.join(LESSON_DIR, 'index.json'), 'utf8'));
 const lessonById = Object.fromEntries(lessons.map((l) => [l.id, l]));
 const practice = JSON.parse(fs.readFileSync(path.join(LESSON_DIR, 'practice.json'), 'utf8'));
+const quizFile = path.join(LESSON_DIR, 'quiz.json');
+const quizzes = fs.existsSync(quizFile) ? JSON.parse(fs.readFileSync(quizFile, 'utf8')) : {};
 const practiceFor = (lessonId) => ({
   items: practice.items[lessonId] || [],
   note: (practice.note && practice.note[lessonId]) || null,
@@ -109,7 +111,9 @@ async function handleApi(req, res, parts, query) {
 
   // GET /api/lessons, /api/lessons/:id
   if (parts[0] === 'lessons') {
-    if (parts.length === 1) return send(res, 200, lessons);
+    if (parts.length === 1) {
+      return send(res, 200, lessons.map((l) => ({ ...l, quizCount: (quizzes[l.id] || []).length })));
+    }
     const lesson = lessonById[parts[1]];
     if (parts[1] === 'practice') {
       const groups = lessons
@@ -123,6 +127,7 @@ async function handleApi(req, res, parts, query) {
       ...lesson,
       problemTitle: problem ? problem.title : null,
       practice: { intro: practice.intro, ...practiceFor(lesson.id) },
+      quiz: quizzes[lesson.id] || [],
       html: fs.readFileSync(path.join(LESSON_DIR, `${lesson.id}.html`), 'utf8'),
     });
   }

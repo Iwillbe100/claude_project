@@ -267,6 +267,74 @@
   // ------------------------------------------------------------ 학습
   const isDone = (id) => store.get(`lessonDone:${id}`) === '1';
 
+  // 퀴즈 답안 기록: quiz:<id> = [선택한 보기 번호 또는 null, ...]
+  const quizAnswers = (id) => { try { return JSON.parse(store.get(`quiz:${id}`)) || []; } catch { return []; } };
+  // 퀴즈 점수: quizScore:<id> = "맞힌 수/전체" (전부 풀었을 때만 기록)
+  const quizScore = (id) => {
+    const v = store.get(`quizScore:${id}`);
+    if (!v) return null;
+    const [ok, total] = v.split('/').map(Number);
+    return { ok, total };
+  };
+  // `코드` 표기를 <code>로 바꾼다 (나머지는 이스케이프)
+  const fmt = (s) => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>');
+  const isAnswered = (a) => a !== null && a !== undefined;
+
+  function renderQuiz(container, id, quiz) {
+    const sec = document.createElement('section');
+    sec.className = 'quiz';
+    container.appendChild(sec);
+    let answers = quizAnswers(id);
+    const draw = () => {
+      const answered = quiz.filter((q, i) => isAnswered(answers[i])).length;
+      const correct = quiz.filter((q, i) => answers[i] === q.answer).length;
+      let verdict = `${answered} / ${quiz.length} 풀었음`;
+      if (answered === quiz.length) {
+        const msg = correct === quiz.length ? '완벽합니다. 연결된 연습 문제로 넘어가세요.'
+          : correct >= quiz.length * 0.7 ? '거의 다 왔습니다. 틀린 문제의 해설을 다시 보세요.'
+            : '본문을 한 번 더 읽고 다시 풀어 보세요.';
+        verdict = `결과: <b>${correct} / ${quiz.length}</b> — ${msg}`;
+      }
+      sec.innerHTML = `
+        <h2>이해도 점검 <span class="quiz-count">${quiz.length}문제</span></h2>
+        <p class="note">읽은 내용을 정말 이해했는지 확인합니다. 보기를 고르면 바로 정답과 해설이 나옵니다. 틀린 문제는 해설을 읽고 본문의 해당 부분을 다시 보세요.</p>
+        ${quiz.map((q, i) => {
+          const picked = answers[i];
+          const done = isAnswered(picked);
+          return `<div class="q ${done ? (picked === q.answer ? 'q-ok' : 'q-bad') : ''}" data-q="${i}">
+            <div class="q-no">Q${i + 1}${q.tag ? ` · ${esc(q.tag)}` : ''}</div>
+            <div class="q-text">${fmt(q.q)}</div>
+            ${q.code ? `<pre class="codeview"><code>${esc(q.code)}</code></pre>` : ''}
+            <div class="opts">${q.options.map((o, j) => {
+              let cls = '';
+              if (done && j === q.answer) cls = 'right';
+              else if (done && j === picked) cls = 'wrong';
+              return `<button class="opt ${cls}" data-o="${j}" ${done ? 'disabled' : ''}><span class="opt-k">${'ABCDE'[j]}</span><span>${fmt(o)}</span></button>`;
+            }).join('')}</div>
+            ${done ? `<div class="explain"><b>${picked === q.answer ? '정답입니다.' : `오답입니다. 정답은 ${'ABCDE'[q.answer]}.`}</b> ${fmt(q.explain)}</div>` : ''}
+          </div>`;
+        }).join('')}
+        <div class="quiz-foot">
+          <span class="quiz-result">${verdict}</span>
+          ${answered ? '<button class="btn ghost small" data-quiz-reset>다시 풀기</button>' : ''}
+        </div>`;
+      sec.querySelectorAll('.opt:not([disabled])').forEach((b) => {
+        b.onclick = () => {
+          const qi = Number(b.closest('.q').dataset.q);
+          answers[qi] = Number(b.dataset.o);
+          store.set(`quiz:${id}`, JSON.stringify(answers));
+          if (quiz.every((q, i) => isAnswered(answers[i]))) {
+            store.set(`quizScore:${id}`, `${quiz.filter((q, i) => answers[i] === q.answer).length}/${quiz.length}`);
+          }
+          draw();
+        };
+      });
+      const reset = sec.querySelector('[data-quiz-reset]');
+      if (reset) reset.onclick = () => { answers = []; store.set(`quiz:${id}`, '[]'); draw(); };
+    };
+    draw();
+  }
+
   // 추천 문제 목록 (외부 사이트 링크는 새 탭으로 연다)
   function practiceHtml(p) {
     if (!p || !p.items.length) return '';
@@ -285,11 +353,39 @@
 
   async function showLessons() {
     mount('tpl-learn');
-    const list = await api('/api/lessons');
+    const [list, probs] = await Promise.all([api('/api/lessons'), api('/api/problems')]);
+    const probById = Object.fromEntries(probs.map((p) => [p.id, p]));
     const done = list.filter((l) => isDone(l.id)).length;
+    const quizzed = list.filter((l) => l.quizCount);
+    const perfect = (id) => { const q = quizScore(id); return !!q && q.ok === q.total; };
+    const quizPerfect = quizzed.filter((l) => perfect(l.id)).length;
+    const linked = list.filter((l) => l.problem && probById[l.problem]);
+    const solvedLinked = linked.filter((l) => probById[l.problem].status === 'AC').length;
+    // 숙련도: 강의 읽기, 퀴즈 만점, 연결 문제 해결을 같은 비중으로 본다
+    const totalSteps = list.length + quizzed.length + linked.length;
+    const mastery = Math.round(((done + quizPerfect + solvedLinked) / Math.max(1, totalSteps)) * 100);
     document.getElementById('learnProgress').innerHTML = `
-      <div class="bar"><div class="fill" style="width:${Math.round((done / list.length) * 100)}%"></div></div>
-      <span>${done} / ${list.length} 완료</span>`;
+      <div class="mastery">
+        <div class="mastery-top"><strong>전체 숙련도 ${mastery}%</strong><span>강의 읽기 + 퀴즈 만점 + 연결 문제 해결</span></div>
+        <div class="bar"><div class="fill" style="width:${mastery}%"></div></div>
+        <div class="mastery-parts">
+          <span>강의 ${done} / ${list.length}</span>
+          <span>퀴즈 만점 ${quizPerfect} / ${quizzed.length}</span>
+          <span>연결 문제 해결 ${solvedLinked} / ${linked.length}</span>
+        </div>
+      </div>`;
+    const quizBadge = (l) => {
+      if (!l.quizCount) return '';
+      const q = quizScore(l.id);
+      const cls = q ? (q.ok === q.total ? 'ok' : 'part') : '';
+      return `<span class="badge-s ${cls}" title="이해도 점검">퀴즈 ${q ? `${q.ok}/${q.total}` : `-/${l.quizCount}`}</span>`;
+    };
+    const probBadge = (l) => {
+      const p = l.problem && probById[l.problem];
+      if (!p) return '';
+      const cls = p.status === 'AC' ? 'ok' : p.status ? 'part' : '';
+      return `<span class="badge-s ${cls}" title="${esc(p.title)}">문제 ${p.status === 'AC' ? '해결' : p.status ? '시도' : '미풀이'}</span>`;
+    };
     const levels = [...new Set(list.map((l) => l.level))];
     document.getElementById('lessonGroups').innerHTML = levels.map((level) => `
       <h2 class="level">${esc(level)}</h2>
@@ -301,7 +397,7 @@
               <strong>${esc(l.title)}</strong>
               <span class="lc-sum">${esc(l.summary)}</span>
             </span>
-            <span class="lc-min">${l.minutes}분</span>
+            <span class="lc-badges">${quizBadge(l)}${probBadge(l)}<span class="lc-min">${l.minutes}분</span></span>
           </a>`).join('')}
       </div>`).join('');
 
@@ -351,6 +447,8 @@
       };
       wrap.appendChild(btn);
     });
+
+    if (lesson.quiz && lesson.quiz.length) renderQuiz(body, id, lesson.quiz);
 
     if (lesson.practice && lesson.practice.items.length) {
       const sec = document.createElement('section');

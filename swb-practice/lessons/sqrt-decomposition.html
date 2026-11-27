@@ -1,0 +1,91 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>"구간 l~r에 모두 v를 <b>더한다</b>" + "구간의 최댓값·합을 구한다"</li>
+  <li>세그먼트 트리로 하려면 lazy propagation이 필요해서 시험장에서 짜기 부담스러울 때</li>
+  <li>규칙이 복잡해서 세그먼트 트리 노드에 담기 어려운 정보를 다룰 때</li>
+</ul>
+<p>B형에서는 "정답 코드가 짧고 실수가 적은" 방법이 유리하다. 버킷은 O(√N)이라 세그먼트 트리보다 느리지만, N이 10만이면 한 번에 몇백 번 정도라 충분할 때가 많다.</p>
+
+<h2>핵심 아이디어</h2>
+<p>배열을 크기 B(보통 √N 근처)인 <b>버킷</b>으로 나눈다. 버킷마다 요약 정보를 저장한다.</p>
+<ul>
+  <li><code>lazy[b]</code>: 버킷 b 전체에 한꺼번에 더해진 값</li>
+  <li><code>bmax[b]</code>: lazy를 빼고 본 버킷 안의 최댓값</li>
+</ul>
+<p>실제 값은 <code>arr[i] + lazy[i // B]</code>이다. 구간 [l, r]을 처리할 때</p>
+<ul>
+  <li><b>통째로 덮이는 버킷</b>은 요약 정보만 고친다: O(1)씩, 최대 N/B개</li>
+  <li><b>양 끝에 걸친 버킷</b>은 칸을 직접 고치고 요약을 다시 계산한다: 최대 2개, O(B)씩</li>
+</ul>
+<pre class="diagram">N = 9, B = 3
+칸     0 1 2 | 3 4 5 | 6 7 8
+버킷     0   |   1   |   2
+
+grow(1, 7, +5)
+  버킷 0: 칸 1, 2만 걸침 → 직접 더하고 bmax[0] 다시 계산
+  버킷 1: 통째로       → lazy[1] += 5  (칸은 안 건드림)
+  버킷 2: 칸 6, 7만 걸침 → 직접 더하고 bmax[2] 다시 계산</pre>
+<p>한 번의 연산이 O(B + N/B)이고, B = √N일 때 O(√N)으로 가장 작다. N = 100,000이면 약 316이다.</p>
+
+<h2>코드 (구간 더하기 + 구간 최댓값)</h2>
+<pre class="codeview"><code>def init(N_, a):
+    global N, B, arr, lazy, bmax
+    N = N_
+    B = max(1, int(N ** 0.5))
+    arr = list(a)
+    nb = (N + B - 1) // B                       # 버킷 개수 (마지막 버킷은 짧을 수 있다)
+    lazy = [0] * nb
+    bmax = [max(arr[b * B:(b + 1) * B]) for b in range(nb)]
+
+def add_part(l, r, v):                          # 같은 버킷 안의 l..r에 직접 더하기
+    arr[l:r + 1] = [x + v for x in arr[l:r + 1]]
+    b = l // B
+    bmax[b] = max(arr[b * B:(b + 1) * B])
+
+def add(l, r, v):
+    bl, br = l // B, r // B
+    if bl == br:                                # 버킷 하나 안에서 끝나는 경우
+        add_part(l, r, v)
+        return
+    add_part(l, (bl + 1) * B - 1, v)
+    add_part(br * B, r, v)
+    for b in range(bl + 1, br):
+        lazy[b] += v
+
+def query_max(l, r):
+    bl, br = l // B, r // B
+    if bl == br:
+        return max(arr[l:r + 1]) + lazy[bl]
+    best = max(max(arr[l:(bl + 1) * B]) + lazy[bl],
+               max(arr[br * B:r + 1]) + lazy[br])
+    for b in range(bl + 1, br):
+        best = max(best, bmax[b] + lazy[b])
+    return best</code></pre>
+
+<h2>한 칸을 특정 값으로 바꿀 때</h2>
+<p>arr에는 lazy를 뺀 값이 들어 있으므로, 실제 값을 x로 만들려면 <code>arr[i] = x - lazy[i // B]</code>로 저장하고 그 버킷의 bmax를 다시 계산한다. 여기서 lazy를 빼먹는 실수가 가장 흔하다.</p>
+
+<h2>파이썬에서 빠르게 쓰는 요령</h2>
+<ul>
+  <li>버킷 안의 칸을 훑을 때는 <code>for</code>문 대신 <code>max(arr[s:e])</code>, 슬라이스 대입처럼 <b>내장 함수</b>를 쓴다. 파이썬 반복문 한 번보다 C로 도는 내장 함수가 훨씬 빠르다.</li>
+  <li>버킷 크기는 꼭 √N일 필요가 없다. 부분 버킷 처리가 내장 함수로 빠르다면 B를 조금 키우고 버킷 수를 줄이는 편이 빠를 때도 있다.</li>
+</ul>
+
+<h2>자주 하는 실수</h2>
+<div class="callout warn">
+  <ul>
+    <li><b>l과 r이 같은 버킷</b>인 경우를 따로 처리하지 않으면, 양 끝 처리에서 같은 칸에 두 번 더한다.</li>
+    <li>마지막 버킷은 B칸보다 짧을 수 있다. 슬라이스 <code>arr[b*B:(b+1)*B]</code>는 끝을 넘어도 알아서 잘리지만, 인덱스로 직접 접근할 때는 N을 넘지 않게 한다.</li>
+    <li>부분 버킷의 값을 읽을 때 <code>+ lazy[b]</code>를 빼먹는다.</li>
+    <li>칸을 직접 고친 뒤 bmax를 다시 계산하지 않는다.</li>
+  </ul>
+</div>
+
+<h2>세그먼트 트리와 비교</h2>
+<table>
+  <tr><th></th><th>버킷</th><th>세그먼트 트리</th></tr>
+  <tr><td>한 칸 수정 + 구간 질의</td><td>O(√N)</td><td>O(log N)</td></tr>
+  <tr><td>구간 더하기 + 구간 질의</td><td>O(√N), 코드 그대로</td><td>O(log N), lazy propagation 필요</td></tr>
+  <tr><td>코드 길이·실수 위험</td><td>짧고 단순</td><td>길고 인덱스 실수가 잦다</td></tr>
+</table>
+<p>호출 수가 수만 번 이하라면 버킷으로 충분한지 먼저 계산해 보자. 20,000번 × 약 600번 = 1,200만 번 정도면 파이썬으로도 몇 초 안에 끝난다.</p>

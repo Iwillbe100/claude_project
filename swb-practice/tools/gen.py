@@ -707,8 +707,429 @@ def gen_p11(rng):
     write("p11-printer", "test.txt", cases)
 
 
+# ---------------------------------------------------------------- p12 열차 편성
+def p12_case(rng, Q, add_p, move_p, local_p):
+    """앞·뒤 dict로 열차를 관리하며 정답을 만든다.
+    alive는 무작위로 객차를 고르기 위한 배열(뺄 때는 맨 뒤와 바꿔서 O(1)에 지운다).
+    local_p: 직전에 다룬 객차 근처를 다시 고를 확률 (붙어 있는 객차끼리의 경계 상황을 만든다)."""
+    prv, nxt = {}, {0: -1}
+    alive, pos = [], {}
+    used = set()
+    last = 0
+    out = [str(Q)]
+
+    def new_id():
+        while True:
+            x = rng.randint(1, 10 ** 9) if rng.random() < 0.7 else rng.randint(1, 3 * Q)
+            if x not in used:
+                used.add(x)
+                return x
+
+    def pick():
+        nonlocal last
+        if last in pos and rng.random() < local_p:
+            x = last
+            for _ in range(rng.randint(0, 2)):
+                y = nxt[x] if rng.random() < 0.5 else prv[x]
+                if y > 0:
+                    x = y
+        else:
+            x = alive[rng.randrange(len(alive))]
+        last = x
+        return x
+
+    def pick_prev(exclude=None):
+        if rng.random() < 0.15 or not alive:
+            return 0
+        for _ in range(5):
+            p = pick()
+            if p != exclude:
+                return p
+        return 0
+
+    def link(x, p):
+        q = nxt[p]
+        nxt[p], prv[x], nxt[x] = x, p, q
+        if q != -1:
+            prv[q] = x
+
+    def unlink(x):
+        p, q = prv[x], nxt[x]
+        nxt[p] = q
+        if q != -1:
+            prv[q] = p
+        return q
+
+    for _ in range(Q):
+        r = rng.random()
+        if not alive or r < add_p:
+            x, p = new_id(), pick_prev()
+            link(x, p)
+            pos[x] = len(alive)
+            alive.append(x)
+            out.append(f"1 {x} {p} {len(alive)}")
+            last = x
+        elif r < add_p + move_p:
+            x = pick()
+            p = pick_prev(exclude=x)
+            if prv[x] != p:
+                unlink(x)
+                link(x, p)
+            out.append(f"3 {x} {p} {nxt[x]}")
+        elif r < add_p + move_p + 0.15:
+            x = pick()
+            q = unlink(x)
+            del prv[x], nxt[x]
+            i = pos.pop(x)
+            y = alive.pop()
+            if y != x:
+                alive[i] = y
+                pos[y] = i
+            out.append(f"2 {x} {q}")
+            last = q if q != -1 else 0
+        else:
+            x = pick()
+            cnt = rng.randint(1, 10)
+            res = []
+            y = x
+            while y != -1 and len(res) < cnt:
+                res.append(y)
+                y = nxt[y]
+            out.append(f"4 {x} {cnt} {len(res)} " + " ".join(map(str, res)))
+    return out
+
+
+def gen_p12(rng):
+    write("p12-train", "sample.txt", [
+        p12_case(rng, 12, 0.5, 0.2, 0.3),
+        p12_case(rng, 20, 0.4, 0.25, 0.5),
+        p12_case(rng, 30, 0.35, 0.3, 0.5),
+    ])
+    cases = []
+    for i in range(10):
+        Q = [100, 1000, 5000, 20000, 50000, 100000, 100000, 100000, 100000, 100000][i]
+        add_p = [0.4, 0.4, 0.45, 0.45, 0.5, 0.5, 0.6, 0.3, 0.45, 0.7][i]
+        move_p = [0.2, 0.25, 0.25, 0.25, 0.2, 0.25, 0.2, 0.4, 0.3, 0.1][i]
+        local_p = [0.5, 0.5, 0.3, 0.3, 0.2, 0.2, 0.1, 0.5, 0.0, 0.1][i]
+        cases.append(p12_case(rng, Q, add_p, move_p, local_p))
+    write("p12-train", "test.txt", cases)
+
+
+# ---------------------------------------------------------------- p13 농장 물주기
+class LazyMaxSeg:
+    """구간 더하기 + 구간 최댓값 lazy 세그먼트 트리 (모범 답안의 버킷 방식과 다른 방법)."""
+
+    def __init__(self, a):
+        self.n = len(a)
+        self.size = 1
+        while self.size < self.n:
+            self.size *= 2
+        NEG = -(1 << 60)
+        self.mx = [NEG] * (2 * self.size)
+        self.lz = [0] * (2 * self.size)
+        self.mx[self.size:self.size + self.n] = a
+        for i in range(self.size - 1, 0, -1):
+            self.mx[i] = max(self.mx[2 * i], self.mx[2 * i + 1])
+
+    def _add(self, node, nl, nr, l, r, v):
+        if r < nl or nr < l:
+            return
+        if l <= nl and nr <= r:
+            self.mx[node] += v
+            self.lz[node] += v
+            return
+        mid = (nl + nr) // 2
+        self._add(2 * node, nl, mid, l, r, v)
+        self._add(2 * node + 1, mid + 1, nr, l, r, v)
+        self.mx[node] = max(self.mx[2 * node], self.mx[2 * node + 1]) + self.lz[node]
+
+    def _max(self, node, nl, nr, l, r):
+        if r < nl or nr < l:
+            return -(1 << 60)
+        if l <= nl and nr <= r:
+            return self.mx[node]
+        mid = (nl + nr) // 2
+        return max(self._max(2 * node, nl, mid, l, r),
+                   self._max(2 * node + 1, mid + 1, nr, l, r)) + self.lz[node]
+
+    def add(self, l, r, v):
+        self._add(1, 0, self.size - 1, l, r, v)
+
+    def max(self, l, r):
+        return self._max(1, 0, self.size - 1, l, r)
+
+
+def p13_case(rng, N, Q, hmax, wide_p):
+    """wide_p: 구간을 넓게(버킷 여러 개에 걸치게) 잡을 확률."""
+    h = [rng.randint(0, hmax) for _ in range(N)]
+    seg = LazyMaxSeg(h)
+    out = [f"{N} {Q}", " ".join(map(str, h))]
+
+    def rand_range():
+        if rng.random() < wide_p:
+            l, r = sorted((rng.randrange(N), rng.randrange(N)))
+        else:
+            l = rng.randrange(N)
+            r = min(N - 1, l + rng.randint(0, 20))
+        return l, r
+
+    for _ in range(Q):
+        t = rng.random()
+        if t < 0.4:
+            l, r = rand_range()
+            v = rng.randint(1, 1000)
+            seg.add(l, r, v)
+            out.append(f"1 {l} {r} {v}")
+        elif t < 0.6:
+            i = rng.randrange(N)
+            cur = seg.max(i, i)
+            seg.add(i, i, -cur)
+            out.append(f"2 {i} {cur}")
+        else:
+            l, r = rand_range()
+            out.append(f"3 {l} {r} {seg.max(l, r)}")
+    return out
+
+
+def gen_p13(rng):
+    write("p13-farm", "sample.txt", [
+        p13_case(rng, 6, 10, 9, 0.7),
+        p13_case(rng, 10, 20, 20, 0.6),
+        p13_case(rng, 30, 30, 100, 0.6),
+    ])
+    cases = []
+    for i in range(10):
+        N = [1, 7, 100, 1000, 10000, 100000, 100000, 100000, 99999, 50000][i]
+        Q = [100, 500, 2000, 5000, 10000, 20000, 20000, 20000, 20000, 20000][i]
+        hmax = [10, 100, 1000, 10 ** 6, 10 ** 6, 10 ** 6, 0, 10 ** 6, 10 ** 6, 10 ** 6][i]
+        wide_p = [0.5, 0.5, 0.6, 0.6, 0.7, 0.8, 0.9, 0.2, 1.0, 0.8][i]
+        cases.append(p13_case(rng, N, Q, hmax, wide_p))
+    write("p13-farm", "test.txt", cases)
+
+
+# ---------------------------------------------------------------- p14 도서관 서가
+class Fenwick:
+    def __init__(self, n):
+        self.n = n
+        self.t = [0] * (n + 1)
+
+    def add(self, i, v):
+        i += 1
+        while i <= self.n:
+            self.t[i] += v
+            i += i & -i
+
+    def prefix(self, i):
+        s = 0
+        while i > 0:
+            s += self.t[i]
+            i -= i & -i
+        return s
+
+    def kth(self, k):
+        """prefix(i+1) >= k인 가장 작은 칸 번호 i. 이분 탐색으로 구한다 (모범 답안과 다른 방법)."""
+        lo, hi = 0, self.n - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if self.prefix(mid + 1) >= k:
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
+
+
+def p14_case(rng, N, Q, hot_p, put_p):
+    """hot_p: 일부 칸에 몰아서 다룰 확률. put_p: put 비율 (take 18%, 나머지는 count/find 반반)."""
+    fw = Fenwick(N)
+    cnt = [0] * N
+    total = 0
+    hot = [rng.randrange(N) for _ in range(min(N, 20))]
+    out = [f"{N} {Q}"]
+    count_end = put_p + 0.18 + (1 - put_p - 0.18) / 2
+
+    def pick():
+        if rng.random() < hot_p:
+            return min(N - 1, max(0, rng.choice(hot) + rng.randint(-2, 2)))
+        return rng.randrange(N)
+
+    def amount():
+        return rng.randint(1, 1000) if rng.random() < 0.5 else rng.randint(1, 5)
+
+    for _ in range(Q):
+        r = rng.random()
+        if r < put_p or total == 0:
+            i, c = pick(), amount()
+            cnt[i] += c
+            total += c
+            fw.add(i, c)
+            out.append(f"1 {i} {c} {cnt[i]}")
+        elif r < put_p + 0.18:
+            i, c = pick(), amount()
+            d = min(c, cnt[i])
+            cnt[i] -= d
+            total -= d
+            if d:
+                fw.add(i, -d)
+            out.append(f"2 {i} {c} {d}")
+        elif r < count_end:
+            if rng.random() < 0.3:
+                l = rng.randrange(N)
+                r2 = min(N - 1, l + rng.randint(0, 5))
+            else:
+                l, r2 = sorted((rng.randrange(N), rng.randrange(N)))
+            out.append(f"3 {l} {r2} {fw.prefix(r2 + 1) - fw.prefix(l)}")
+        else:
+            t = rng.random()
+            if t < 0.08:
+                k = total + rng.randint(1, 1000)
+            elif t < 0.16:
+                k = rng.choice([1, total])
+            else:
+                k = rng.randint(1, total)
+            out.append(f"4 {k} {fw.kth(k) if k <= total else -1}")
+    return out
+
+
+def gen_p14(rng):
+    write("p14-shelf", "sample.txt", [
+        p14_case(rng, 8, 12, 0.3, 0.4),
+        p14_case(rng, 10, 20, 0.5, 0.35),
+        p14_case(rng, 30, 30, 0.5, 0.35),
+    ])
+    cases = []
+    for i in range(10):
+        N = [1, 5, 100, 1000, 10000, 100000, 100000, 100000, 99991, 65536][i]
+        Q = [100, 1000, 5000, 10000, 30000, 50000, 50000, 50000, 50000, 50000][i]
+        hot_p = [0.5, 0.5, 0.5, 0.3, 0.3, 0.2, 0.8, 0.0, 0.5, 0.3][i]
+        put_p = [0.35, 0.35, 0.35, 0.3, 0.3, 0.3, 0.3, 0.45, 0.25, 0.3][i]
+        cases.append(p14_case(rng, N, Q, hot_p, put_p))
+    write("p14-shelf", "test.txt", cases)
+
+
+# ---------------------------------------------------------------- p15 택시 호출
+def p15_case(rng, N, L, Q, cap, cluster_p, call_p):
+    """정답은 튜플 키를 쓰는 단순한 격자 버킷으로 만든다.
+    cluster_p: 택시를 핫스팟 근처에 둘 확률. call_p: callTaxi 비율."""
+    pos, cell = {}, {}
+    riding = []
+    used = set()
+    alive, where = [], {}
+    centers = [(rng.randrange(N), rng.randrange(N)) for _ in range(12)]
+    out = [f"{N} {L} {Q}"]
+
+    def clip(v):
+        return min(N - 1, max(0, v))
+
+    def rand_point():
+        if rng.random() < cluster_p:
+            cx, cy = rng.choice(centers)
+            sp = 4 * L
+            return clip(cx + rng.randint(-sp, sp)), clip(cy + rng.randint(-sp, sp))
+        return rng.randrange(N), rng.randrange(N)
+
+    def new_id():
+        while True:
+            x = rng.randint(1, 10 ** 9) if rng.random() < 0.7 else rng.randint(1, 3 * Q)
+            if x not in used:
+                used.add(x)
+                return x
+
+    def put(i, x, y):
+        pos[i] = (x, y)
+        cell.setdefault((x // L, y // L), set()).add(i)
+        where[i] = len(alive)
+        alive.append(i)
+
+    def take(i):
+        x, y = pos.pop(i)
+        cell[(x // L, y // L)].discard(i)
+        j = where.pop(i)
+        last = alive.pop()
+        if last != i:
+            alive[j] = last
+            where[last] = j
+
+    def near(x, y):
+        cx, cy = x // L, y // L
+        res = []
+        for gx in (cx - 1, cx, cx + 1):
+            for gy in (cy - 1, cy, cy + 1):
+                for i in cell.get((gx, gy), ()):
+                    px, py = pos[i]
+                    d = abs(px - x) + abs(py - y)
+                    if d <= L:
+                        res.append((d, i))
+        return res
+
+    def query_point():
+        t = rng.random()
+        if alive and t < 0.55:
+            px, py = pos[alive[rng.randrange(len(alive))]]
+            return clip(px + rng.randint(-L - 2, L + 2)), clip(py + rng.randint(-L - 2, L + 2))
+        if alive and t < 0.75:
+            px, py = pos[alive[rng.randrange(len(alive))]]
+            dx = rng.randint(0, L)
+            dy = L - dx + rng.choice([0, 0, 1])       # 거리가 정확히 L 또는 L+1
+            return clip(px + rng.choice([-dx, dx])), clip(py + rng.choice([-dy, dy]))
+        return rand_point()
+
+    for _ in range(Q):
+        r = rng.random()
+        if not alive or (r < 0.3 and len(alive) < cap):
+            if riding and rng.random() < 0.3:
+                i = riding.pop(rng.randrange(len(riding)))
+            else:
+                i = new_id()
+            x, y = rand_point()
+            put(i, x, y)
+            out.append(f"1 {i} {x} {y}")
+        elif r < 0.5:
+            i = alive[rng.randrange(len(alive))]
+            if rng.random() < 0.7:
+                px, py = pos[i]
+                x, y = clip(px + rng.randint(-2 * L, 2 * L)), clip(py + rng.randint(-2 * L, 2 * L))
+            else:
+                x, y = rand_point()
+            take(i)
+            put(i, x, y)
+            out.append(f"2 {i} {x} {y}")
+        elif r < 0.5 + call_p:
+            x, y = query_point()
+            c = near(x, y)
+            if c:
+                d, i = min(c)
+                take(i)
+                riding.append(i)
+                out.append(f"3 {x} {y} {i}")
+            else:
+                out.append(f"3 {x} {y} -1")
+        else:
+            x, y = query_point()
+            out.append(f"4 {x} {y} {len(near(x, y))}")
+    return out
+
+
+def gen_p15(rng):
+    write("p15-taxi", "sample.txt", [
+        p15_case(rng, 20, 3, 15, 10, 0.5, 0.25),
+        p15_case(rng, 50, 5, 25, 15, 0.5, 0.25),
+        p15_case(rng, 100, 10, 40, 30, 0.5, 0.25),
+    ])
+    cases = []
+    for i in range(10):
+        N = [10, 100, 1000, 10000, 100000, 1000000, 1000000, 1000000, 200000, 1000000][i]
+        L = [10, 7, 30, 100, 1000, 10000, 1000, 5000, 2000, 100][i]
+        Q = [200, 1000, 5000, 10000, 30000, 30000, 30000, 30000, 30000, 30000][i]
+        cap = [20, 200, 2000, 5000, 20000, 20000, 20000, 20000, 20000, 20000][i]
+        cluster_p = [0.0, 0.3, 0.5, 0.5, 0.5, 0.2, 0.8, 0.5, 0.3, 0.9][i]
+        call_p = [0.25, 0.25, 0.25, 0.3, 0.25, 0.2, 0.2, 0.3, 0.2, 0.25][i]
+        cases.append(p15_case(rng, N, L, Q, cap, cluster_p, call_p))
+    write("p15-taxi", "test.txt", cases)
+
+
 GENERATORS = {"p10-robot": gen_p10, "p11-printer": gen_p11, "p1-word": gen_p1, "p2-ranking": gen_p2, "p3-segment": gen_p3, "p4-org": gen_p4,
-              "p5-union": gen_p5, "p6-dijkstra": gen_p6, "p7-binary": gen_p7, "p8-dfs": gen_p8, "p9-bfs": gen_p9}
+              "p5-union": gen_p5, "p6-dijkstra": gen_p6, "p7-binary": gen_p7, "p8-dfs": gen_p8, "p9-bfs": gen_p9,
+              "p12-train": gen_p12, "p13-farm": gen_p13, "p14-shelf": gen_p14, "p15-taxi": gen_p15}
 
 if __name__ == "__main__":
     targets = sys.argv[1:] or list(GENERATORS)

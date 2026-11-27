@@ -1,0 +1,83 @@
+<h2>언제 쓰나</h2>
+<ul>
+  <li>"A를 B <b>바로 뒤에</b> 넣는다", "A를 빼고 앞뒤를 잇는다", "A를 다른 위치로 옮긴다"</li>
+  <li>줄 서기, 열차, 플레이리스트, 텍스트 편집기의 커서처럼 <b>순서</b>가 있고 중간이 자주 바뀔 때</li>
+  <li>"몇 번째"보다 "누구의 앞·뒤"가 중요할 때</li>
+</ul>
+
+<h2>왜 파이썬 리스트로는 안 되나</h2>
+<p>리스트는 칸이 빈틈없이 붙어 있다. 중간에 하나를 넣거나 빼면 뒤쪽 칸을 전부 한 칸씩 밀어야 한다. 위치를 찾는 <code>index()</code>도 앞에서부터 하나씩 훑는다.</p>
+<table>
+  <tr><th>연산</th><th>리스트</th><th>연결 리스트</th></tr>
+  <tr><td>x가 어디 있는지 찾기</td><td>O(N) <code>index</code></td><td>O(1) dict 조회</td></tr>
+  <tr><td>x 바로 뒤에 넣기</td><td>O(N) <code>insert</code></td><td>O(1)</td></tr>
+  <tr><td>x 빼기</td><td>O(N) <code>remove</code>, <code>pop(i)</code></td><td>O(1)</td></tr>
+  <tr><td>k번째 원소</td><td>O(1)</td><td>O(k) (약점)</td></tr>
+</table>
+<p>N이 수만이고 호출이 10만 번이면 리스트 방식은 수십억 번 일하게 된다.</p>
+
+<h2>핵심 아이디어</h2>
+<p>원소마다 <b>바로 앞(prv)</b>과 <b>바로 뒤(nxt)</b>만 기억한다. 전체 순서는 맨 앞에서 nxt를 따라가면 나온다. ID가 크거나 띄엄띄엄하면 dict, 0~N-1처럼 촘촘하면 리스트 두 개로 둔다.</p>
+<p>맨 앞에 항상 존재하는 <b>머리 노드</b>(예: 기관차 0번)를 하나 두면, "맨 앞에 넣기"가 "0번 뒤에 넣기"가 되어 경우 나누기가 줄어든다.</p>
+<pre class="diagram">0 ⇄ 5 ⇄ 9 ⇄ 8          nxt[5] = 9, prv[9] = 5, nxt[8] = -1
+
+x=3을 5 뒤에 넣기 (p=5, q=nxt[5]=9)
+   nxt[5]=3  prv[3]=5  nxt[3]=9  prv[9]=3
+0 ⇄ 5 ⇄ 3 ⇄ 9 ⇄ 8
+
+x=9 빼기 (p=prv[9]=3, q=nxt[9]=8)
+   nxt[3]=8  prv[8]=3
+0 ⇄ 5 ⇄ 3 ⇄ 8</pre>
+
+<h2>코드</h2>
+<pre class="codeview"><code>prv = {}
+nxt = {}
+
+def init():
+    global prv, nxt
+    prv = {}
+    nxt = {0: -1}          # 머리 노드 0. -1은 "뒤에 없음"
+
+def link_after(x, p):      # x를 p 바로 뒤에 끼운다
+    q = nxt[p]
+    nxt[p] = x
+    prv[x] = p
+    nxt[x] = q
+    if q != -1:            # 맨 뒤에 넣을 때는 q가 없다
+        prv[q] = x
+
+def unlink(x):             # x를 떼어 내고 앞뒤를 잇는다
+    p, q = prv[x], nxt[x]
+    nxt[p] = q
+    if q != -1:
+        prv[q] = p
+
+def move(x, p):            # 옮기기 = 빼기 + 넣기
+    if prv[x] != p:
+        unlink(x)
+        link_after(x, p)</code></pre>
+
+<h2>다른 방법: 커서만 움직이면 스택 두 개</h2>
+<p>텍스트 편집기처럼 <b>커서 한 곳에서만</b> 넣고 지운다면, 커서 왼쪽 글자와 오른쪽 글자를 스택 두 개에 나눠 담는 방법이 더 간단하다. 커서를 왼쪽으로 한 칸 옮기면 왼쪽 스택의 맨 위를 오른쪽 스택으로 옮긴다. 아무 위치에서나 넣고 빼야 하면 연결 리스트를 쓴다.</p>
+<pre class="codeview"><code>left, right = list("abc"), []      # 커서는 c 뒤
+right.append(left.pop())           # 커서를 왼쪽으로: "ab|c"
+left.append("x")                   # 커서 위치에 입력: "abx|c"
+left.pop()                         # 백스페이스: "ab|c"
+# right는 뒤집힌 순서로 저장된다. 전체 문자열은 left + right[::-1]</code></pre>
+
+<h2>삭제 후 복구가 있다면</h2>
+<p>지운 원소의 prv, nxt를 지우지 않고 남겨 두면, 나중에 <code>link_after(x, prv[x])</code>로 되살릴 수 있다. 단, "가장 최근에 지운 것부터 복구"처럼 순서가 정해져 있을 때만 안전하다(스택에 지운 순서를 쌓는다). 프로그래머스 "표 편집"이 이 유형이다.</p>
+
+<h2>자주 하는 실수</h2>
+<div class="callout warn">
+  <ul>
+    <li><b>맨 뒤 처리</b>: 뒤에 아무것도 없을 때(<code>q == -1</code>) <code>prv[q]</code>를 건드리면 오류가 나거나 엉뚱한 키가 생긴다.</li>
+    <li><b>옮길 위치가 자기 바로 앞</b>이면 빼고 넣어도 결과가 같다. 하지만 "자기 자신 뒤"로 옮기라는 입력은 처리 순서가 꼬이므로, 제약 사항에서 막혀 있는지 확인한다.</li>
+    <li>넣을 때 <code>q = nxt[p]</code>를 <b>먼저</b> 저장해야 한다. <code>nxt[p] = x</code>를 먼저 하면 원래 뒤가 사라진다.</li>
+    <li>떼어 낸 원소의 dict 항목을 지우지 않으면, 나중에 "있는가"를 <code>x in nxt</code>로 확인할 때 틀린다.</li>
+    <li><code>init</code>에서 머리 노드(<code>nxt = {0: -1}</code>)를 다시 만드는 것을 잊지 않는다.</li>
+  </ul>
+</div>
+
+<h2>복잡도</h2>
+<p>넣기, 빼기, 옮기기는 O(1)이다. 어떤 원소부터 K개를 읽는 것은 O(K)이다. "k번째 원소"처럼 위치로 찾아야 한다면 연결 리스트만으로는 느리니, 버킷(제곱근 분할)이나 다른 자료구조를 함께 생각한다.</p>
